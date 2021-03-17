@@ -1,23 +1,8 @@
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-
-#define TABLE_SIZE 10000
-
-typedef struct entry_t {
-        char *key;
-        char *value;
-        struct entry_t *next;
-} entry_t;
-
-typedef struct h_table {
-        entry_t **entries;
-} h_table;
+#include "hashtable.h"
 
 /* djb2 by Dan Bernstein */
-unsigned int hash (char *key) {
+unsigned int hash (char *key) 
+{
         unsigned long hash = 5381;
         int c;
 
@@ -29,7 +14,7 @@ unsigned int hash (char *key) {
         return hash % TABLE_SIZE;
 }
 
-struct h_table *create_table ()
+h_table *create_table()
 {
         
         int i = 0;
@@ -118,7 +103,8 @@ char *get_entry(h_table *table, char *key)
 }
 
 
-void delete_entry(h_table* table, char *key) {
+void delete_entry(h_table* table, char *key)
+{
         int hashcode = 0;
         int index_list = 0; 
         entry_t *entry = NULL;
@@ -165,7 +151,8 @@ void delete_entry(h_table* table, char *key) {
         }
 }
 
-void delete_table(h_table* table) {
+void delete_table(h_table* table)
+{
         entry_t *entry = NULL;
         entry_t *next = NULL;
         int i = 0;
@@ -187,7 +174,8 @@ void delete_table(h_table* table) {
         free(table);
 }
 
-void print_table(h_table *table) {
+void print_table(h_table *table)
+{
         int i = 0;
         entry_t *entry = NULL;
         
