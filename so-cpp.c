@@ -1,5 +1,26 @@
 #include "so-cpp.h"
 
+/* function to check if string has '/0' */
+void print_string_decimal(char *str) {
+        int i = 0;
+
+        for (i = 0; i < strlen(str) + 1; i++) {
+                printf("%d ", str[i]);
+        }
+        printf("\n");
+
+        /*
+        for (i = 0; i < strlen(entry->key) + 1; i++) {
+                printf("%d ", entry->key[i]);
+        }
+
+        printf("\n");
+        
+        for (i = 0; i < strlen(entry->value) + 1; i++) {
+                printf("%d ", entry->value[i]);
+        }
+        */
+}
 
 entry_t* parse_symbol_mapping(char *str) {
 
@@ -46,35 +67,14 @@ entry_t* parse_symbol_mapping(char *str) {
         return entry;
 }
 
-/* function to check if string has '/0' */
-void print_string_decimal(char *str) {
-        int i = 0;
 
-        for (i = 0; i < strlen(str) + 1; i++) {
-                printf("%d ", str[i]);
-        }
-        printf("\n");
-
-        /*
-        for (i = 0; i < strlen(entry->key) + 1; i++) {
-                printf("%d ", entry->key[i]);
-        }
-
-        printf("\n");
-        
-        for (i = 0; i < strlen(entry->value) + 1; i++) {
-                printf("%d ", entry->value[i]);
-        }
-        */
+void parse_path (vector *paths, char *str) {
+        insert_string(paths, str);
 }
 
-int main(int argc, char **argv) {
-        
+void read_arguments (h_table *table, vector *vector, int argc, char **argv) {
         int i = 0;
-        size_t aux_size = LINE_SIZE;
-        char *aux = malloc(aux_size * sizeof(char));
-        entry_t *entry;
-        memset(aux, 0, aux_size);
+        entry_t *entry = NULL;
 
         /* for (i = 1; i < argc; i++) { */
         while (i < argc) {
@@ -93,17 +93,50 @@ int main(int argc, char **argv) {
                         
                 } else if (strcmp(argv[i], "-I") == 0) {
 
-                } else if (strcmp(argv[i], "-I") == 0) {
+                } else if (strncmp(argv[i], "-I", 2) == 0) {
 
                 }
                 i++;
+
+                print_string_decimal(entry->value);
+                print_string_decimal(entry->key);
         }
+}
 
-        print_string_decimal(entry->value);
-        print_string_decimal(entry->key);
-
+int main (int argc, char **argv) {
         
-        /* printf("key: %s, value: %s\n", entry->key, entry->value); */
+        int i = 0;
+        entry_t *entry = NULL;
+        
+        
+        vector *paths =  create_vector(10);
+
+        /* read_arguments (table, paths, argc, argv);
+        
+        h_table *table = create_table(); 
+        char *aux = malloc(aux_size * sizeof(char));
+        memset(aux, 0, aux_size);
+        size_t aux_size = LINE_SIZE;
+        */
+
+
+
+        insert_string(paths, "11111");
+        insert_string(paths, "22222");
+        insert_string(paths, "33333");
+        insert_string(paths, "44444");
+        insert_string(paths, "55555");
+        insert_string(paths, "666666");
+        insert_string(paths, "777777");
+  
+
+
+        /* 
+        print_vector(paths);
+        
+        printf("key: %s, value: %s\n", entry->key, entry->value); 
+        printf("%d, %d\n", paths->size, paths->capacity);
+        */
 
         /*
         h_table *table = create_table();
@@ -118,8 +151,11 @@ int main(int argc, char **argv) {
         insert_entry(table, "name8", "pandemie asdfas dasf asd as f");
         insert_entry(table, "name9", "uliuuu");
         print_table(table);
-        delete_table(table);
+
+        delete_table(table); 
         */
+        delete_vector(paths);
+
 
         return 0;
 }

@@ -6,3 +6,4 @@ valgrind --leak-check=full \
          --verbose \
          --log-file=valgrind-out.txt \
          ./$1
+
