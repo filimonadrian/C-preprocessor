@@ -22,7 +22,7 @@ h_table *create_table()
         h_table *table = malloc(sizeof(struct h_table));
         
         /* create all entries for the table */
-        table->entries = malloc(sizeof(struct entry_t*) * TABLE_SIZE);
+        table->entries = malloc(TABLE_SIZE * sizeof(struct entry_t*));
 
         /* set all entries to NULL */
         for (i = 0; i < TABLE_SIZE; i++) {
@@ -47,7 +47,7 @@ entry_t *create_pair(char *key, char *value)
 }
 
 /* insert a new pair or update the value for an existent key */
-void insert_entry(h_table *table, char *key, char *value)
+void insert_pair(h_table *table, char *key, char *value)
 {
         unsigned int hashcode = 0;
         entry_t *prev_neigh = NULL;
@@ -78,6 +78,39 @@ void insert_entry(h_table *table, char *key, char *value)
 
         prev_neigh->next = create_pair(key, value);
 
+}
+
+void insert_entry (h_table *table, entry_t *entry) {
+        
+        unsigned int hashcode = 0;
+        entry_t *prev_neigh = NULL;
+        entry_t *trailer = NULL;
+
+        hashcode = hash(entry->key);
+
+        /* insert entry if does not already exist a slot with its hashcode */
+        trailer = table->entries[hashcode];
+        if (trailer == NULL) {
+                table->entries[hashcode] = entry;
+                return;
+        }
+
+        
+        /* update the value if the entry exists in the list of a slot*/
+        while (trailer != NULL) {
+                if (strcmp(trailer->key, entry->key) == 0) {
+                        free(trailer->value);
+                        free(trailer->key);
+                        entry->next = trailer->next;
+                        trailer = entry;
+                        return;
+                }
+                
+                prev_neigh = trailer;
+                trailer = prev_neigh->next;
+        }
+
+        prev_neigh->next = entry;
 }
 
 char *get_entry(h_table *table, char *key)
@@ -154,19 +187,19 @@ void delete_entry(h_table* table, char *key)
 void delete_table(h_table* table)
 {
         entry_t *entry = NULL;
-        entry_t *next = NULL;
+        entry_t *aux = NULL;
         int i = 0;
 
         for (i = 0; i < TABLE_SIZE; i++) {
                 if (table->entries[i] != NULL) {
                         entry = table->entries[i];
                         while (entry != NULL) {
-                                next = entry->next;
+                                aux = entry;
+                                entry = entry->next;
                                 /* free space for entry */
-                                free(entry->key);
-                                free(entry->value);
-                                free(entry);
-                                entry = next;          
+                                free(aux->key);
+                                free(aux->value);
+                                free(aux);
                         }
                 }
         }
@@ -189,7 +222,7 @@ void print_table(h_table *table)
 
                 printf("slot[%d]: ", i);
 
-                while(entry!= NULL) {
+                while (entry != NULL) {
                         printf("%s=%s ", entry->key, entry->value);
                         entry = entry->next;
                 }

@@ -29,7 +29,8 @@ entry_t* parse_symbol_mapping(char *str) {
         size_t str_size = strlen(str);
         size_t i = 0;
 
-        entry_t *entry = malloc(sizeof(entry));
+        entry_t *entry = NULL;
+        entry = malloc(sizeof(entry_t));
         
         for (i = 0; i < str_size; i++) {
                 if (str[i] == '=') {
@@ -39,8 +40,11 @@ entry_t* parse_symbol_mapping(char *str) {
                         /* copy key in entry and append '\0' */
                         entry->key = malloc((i + 1) * sizeof(char));
                         memset(entry->key, 0, i + 1);
+                        memcpy(entry->key, str, i);
+                        
+                        /* entry->key[i] = '\0';
                         strncpy(entry->key, str, i);
-                        /* entry->key[i] = '\0'; */
+                        */
                         
                         /* copy value in entry and append '\0' */
                         value_size = str_size - i;
@@ -56,11 +60,14 @@ entry_t* parse_symbol_mapping(char *str) {
         if (key_mapping == 0) {
                 /* copy in key entire received string */ 
                 entry->key = malloc((str_size + 1) * sizeof(char));
+                /*
                 strcpy(entry->key, str);
+                */
+                memcpy(entry->key, str, str_size);
                 entry->key[str_size] = '\0';
 
                 /* and make value an empty char array */
-                entry->value = malloc(1 * sizeof(char));
+                entry->value = malloc(sizeof(char));
                 entry->value[0] = '\0';
         }
 
@@ -72,22 +79,22 @@ void parse_path (vector *paths, char *str) {
         insert_string(paths, str);
 }
 
-void parse_ouput_file (char **output_file, char *str) {
-        if (*output_file == NULL) {
-                *output_file = malloc(strlen(str) * sizeof(char));
-                memcpy(*output_file, str, strlen(str));
+void parse_filename (char **filename, char *str) {
+        if (*filename == NULL) {
+                *filename = malloc(strlen(str) * sizeof(char));
+                memcpy(*filename, str, strlen(str));
         } else {
-                fprintf(stderr, "Multiple definitions of output file!\n");
+                fprintf(stderr, "Multiple definitions of file!\n");
         }
 }
 
-void read_arguments (h_table *table, vector *paths, char **output_file,
+void read_arguments (h_table *table, vector *paths,
+                    char **output_file, char **input_file,
                     int argc, char **argv) {
 
         int i = 0;
         entry_t *entry = NULL;
 
-        /* for (i = 1; i < argc; i++) { */
         while (i < argc) {
                 /* printf("%s\n", argv[i]); */
 
@@ -95,11 +102,14 @@ void read_arguments (h_table *table, vector *paths, char **output_file,
                 if (strcmp(argv[i], "-D") == 0) {
                         i++;
                         entry = parse_symbol_mapping(argv[i]);
+                        insert_entry(table, entry);
                         /* printf("%s\n", argv[i]); */
 
                 } else if (strncmp(argv[i], "-D", 2) == 0) {
                         
                         entry = parse_symbol_mapping(argv[i] + 2);
+                        insert_entry(table, entry);
+
                         /* printf("%s\n", argv[i] + 2); */
                 } else if (strcmp(argv[i], "-I") == 0) {
                         i++;
@@ -110,9 +120,11 @@ void read_arguments (h_table *table, vector *paths, char **output_file,
                 
                 } else if (strcmp(argv[i], "-o") == 0) {
                         i++;
-                        parse_ouput_file(output_file, argv[i]);
+                        parse_filename(output_file, argv[i]);
                 } else if (strncmp(argv[i], "-o", 2) == 0) {
-                        parse_ouput_file(output_file, argv[i] + 2);
+                        parse_filename(output_file, argv[i] + 2);
+                } else if (i > 0) {
+                        parse_filename(input_file, argv[i]);
                 }
                 
                 i++;
@@ -124,20 +136,36 @@ void read_arguments (h_table *table, vector *paths, char **output_file,
         }
 }
 
-int main (int argc, char **argv) {
+int main (int argc, char **argv)
+{
         
         int i = 0;
         entry_t *entry = NULL;
         char *output_file = NULL;
+        char *input_file = NULL;
         
         
         vector *paths =  create_vector(2);
         h_table *table = create_table(); 
-        read_arguments (table, paths, &output_file, argc, argv);
-        printf("%s\n", output_file);
-
-        /*
+        read_arguments (table, paths, &output_file, &input_file, argc, argv);
         
+
+        if (input_file == NULL) {
+                printf("it's fucking NULL\n");
+        } else {
+                printf("%s\n", input_file);
+        }
+
+        if (output_file == NULL) {
+                printf("it's fucking NULL\n");
+        } else {
+                printf("%s\n", output_file);
+        }
+
+        print_vector(paths);
+        print_table(table);
+        /*
+        printf("%s\n", output_file);
         
         char *aux = malloc(aux_size * sizeof(char));
         memset(aux, 0, aux_size);
@@ -145,7 +173,6 @@ int main (int argc, char **argv) {
         */
 
         /* 
-        print_vector(paths);
 
         
         printf("key: %s, value: %s\n", entry->key, entry->value); 
@@ -177,6 +204,8 @@ int main (int argc, char **argv) {
 
         */
 
+        free(input_file);
+        free(output_file);
         delete_vector(paths);
         delete_table(table); 
 
