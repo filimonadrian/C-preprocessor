@@ -72,7 +72,20 @@ void parse_path (vector *paths, char *str) {
         insert_string(paths, str);
 }
 
-void read_arguments (h_table *table, vector *vector, int argc, char **argv) {
+char **parse_ouput_file (char **output_file, char *str) {
+        if (output_file == NULL) {
+                output_file = malloc(strlen(str) * sizeof(char));
+                memcpy(output_file, str, strlen(str));
+        } else {
+                fprintf(stderr, "Multiple definitions of output file!\n");
+        }
+
+        return output_file;
+}
+
+void read_arguments (h_table *table, vector *paths, char **output_file,
+                    int argc, char **argv) {
+
         int i = 0;
         entry_t *entry = NULL;
 
@@ -90,16 +103,39 @@ void read_arguments (h_table *table, vector *vector, int argc, char **argv) {
                         
                         entry = parse_symbol_mapping(argv[i] + 2);
                         /* printf("%s\n", argv[i] + 2); */
-                        
                 } else if (strcmp(argv[i], "-I") == 0) {
+                        i++;
+                        parse_path(paths, argv[i]);
 
                 } else if (strncmp(argv[i], "-I", 2) == 0) {
+                        parse_path(paths, argv[i] + 2);
+                
+                } else if (strcmp(argv[i], "-o") == 0) {
+                        
+                        i++;
+                        *output_file = malloc(strlen(argv[i]) * sizeof(char));
+                        memcpy(*output_file, argv[i], strlen(argv[i]));
+                        printf("%s\n", *output_file);
 
+                        /*
+                        output_file = 
+                        parse_ouput_file(output_file, argv[i]);
+                        */
+
+                    
+                } else if (strncmp(argv[i], "-o", 2) == 0) {
+                        /*
+                        output_file = 
+                        parse_ouput_file(output_file, argv[i] + 2);
+                        */
                 }
+                
                 i++;
 
+                /*
                 print_string_decimal(entry->value);
                 print_string_decimal(entry->key);
+                */
         }
 }
 
@@ -107,19 +143,35 @@ int main (int argc, char **argv) {
         
         int i = 0;
         entry_t *entry = NULL;
+        char *output_file;
         
         
-        vector *paths =  create_vector(10);
-
-        /* read_arguments (table, paths, argc, argv);
-        
+        vector *paths =  create_vector(2);
         h_table *table = create_table(); 
+        read_arguments (table, paths, &output_file, argc, argv);
+
+        /*
+        
+        *output_file = NULL;
+        
         char *aux = malloc(aux_size * sizeof(char));
         memset(aux, 0, aux_size);
         size_t aux_size = LINE_SIZE;
         */
 
 
+  
+
+        /* 
+        print_vector(paths);
+
+        
+        printf("key: %s, value: %s\n", entry->key, entry->value); 
+        printf("%d, %d\n", paths->size, paths->capacity);
+        */
+
+        /*
+        h_table *table = create_table();
 
         insert_string(paths, "11111");
         insert_string(paths, "22222");
@@ -128,18 +180,7 @@ int main (int argc, char **argv) {
         insert_string(paths, "55555");
         insert_string(paths, "666666");
         insert_string(paths, "777777");
-  
 
-
-        /* 
-        print_vector(paths);
-        
-        printf("key: %s, value: %s\n", entry->key, entry->value); 
-        printf("%d, %d\n", paths->size, paths->capacity);
-        */
-
-        /*
-        h_table *table = create_table();
         insert_entry(table, "name1", "em");
         insert_entry(table, "name2", "russian");
         insert_entry(table, "name3", "pizza asdfasd fasd fasdf ");
@@ -152,9 +193,10 @@ int main (int argc, char **argv) {
         insert_entry(table, "name9", "uliuuu");
         print_table(table);
 
-        delete_table(table); 
         */
+
         delete_vector(paths);
+        delete_table(table); 
 
 
         return 0;

@@ -9,4 +9,9 @@
 void print_string_decimal(char *str);
 entry_t* parse_symbol_mapping(char *str);
 void parse_path (vector *paths, char *str);
+/*
 void read_arguments (h_table *table, vector *vector, int argc, char **argv);
+void read_arguments (h_table *table, vector *vector, char **output_file,
+                    int argc, char **argv);     
+
+*/
