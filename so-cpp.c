@@ -72,15 +72,13 @@ void parse_path (vector *paths, char *str) {
         insert_string(paths, str);
 }
 
-char **parse_ouput_file (char **output_file, char *str) {
-        if (output_file == NULL) {
-                output_file = malloc(strlen(str) * sizeof(char));
-                memcpy(output_file, str, strlen(str));
+void parse_ouput_file (char **output_file, char *str) {
+        if (*output_file == NULL) {
+                *output_file = malloc(strlen(str) * sizeof(char));
+                memcpy(*output_file, str, strlen(str));
         } else {
                 fprintf(stderr, "Multiple definitions of output file!\n");
         }
-
-        return output_file;
 }
 
 void read_arguments (h_table *table, vector *paths, char **output_file,
@@ -111,23 +109,10 @@ void read_arguments (h_table *table, vector *paths, char **output_file,
                         parse_path(paths, argv[i] + 2);
                 
                 } else if (strcmp(argv[i], "-o") == 0) {
-                        
                         i++;
-                        *output_file = malloc(strlen(argv[i]) * sizeof(char));
-                        memcpy(*output_file, argv[i], strlen(argv[i]));
-                        printf("%s\n", *output_file);
-
-                        /*
-                        output_file = 
                         parse_ouput_file(output_file, argv[i]);
-                        */
-
-                    
                 } else if (strncmp(argv[i], "-o", 2) == 0) {
-                        /*
-                        output_file = 
                         parse_ouput_file(output_file, argv[i] + 2);
-                        */
                 }
                 
                 i++;
@@ -143,24 +128,21 @@ int main (int argc, char **argv) {
         
         int i = 0;
         entry_t *entry = NULL;
-        char *output_file;
+        char *output_file = NULL;
         
         
         vector *paths =  create_vector(2);
         h_table *table = create_table(); 
         read_arguments (table, paths, &output_file, argc, argv);
+        printf("%s\n", output_file);
 
         /*
         
-        *output_file = NULL;
         
         char *aux = malloc(aux_size * sizeof(char));
         memset(aux, 0, aux_size);
         size_t aux_size = LINE_SIZE;
         */
-
-
-  
 
         /* 
         print_vector(paths);
