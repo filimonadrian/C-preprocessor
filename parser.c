@@ -47,7 +47,7 @@ void compute_defines(h_table *table, vector *words)
         memset(aux, 0, LINE_SIZE);
 
         if (words->size < 3) {
-                return
+                return;
         }
 
         if (words->size == 3) {
@@ -85,11 +85,13 @@ void compute_defines(h_table *table, vector *words)
         insert_pair(table, get_element(words, 1), aux);
 }
 
+void compute_code() {
 
+}
 
 void read_file(h_table *table, char *input_filename, char *output_filename)
 {
-        FILE *input_fp, output_fp;
+        FILE *input_fp, *output_fp;
         char buffer[LINE_SIZE];
         char buffer_copy[LINE_SIZE];
         char computed_string[LINE_SIZE]; 
@@ -108,17 +110,12 @@ void read_file(h_table *table, char *input_filename, char *output_filename)
                 memcpy(buffer_copy, buffer, LINE_SIZE);
 
                 vector *words = create_vector(5);
-                for (i = 0; i < strlen(buffer); i++) {
-                        if (strncmp(buffer + i , "#define", 7) == 0) {
-                                split_defines(words, buffer);
-                                /*
-                                printf("\n");
-                                compute_defines(table, words);
-                                */
-                                compute_defines(table, words);
-                                print_vector(words);
-                                break;
-                        }
+                split_defines(words, buffer);
+                if (words->size > 0 &&
+                        strncmp(get_element(words, 0), "#define", 7) == 0) {
+                        
+                        compute_defines(table, words);
+                        print_vector(words);
                 }
                 delete_vector(words);
 
@@ -133,6 +130,9 @@ void read_file(h_table *table, char *input_filename, char *output_filename)
         }
 
         fclose(input_fp);
+        /*
+        fclose(output_fp);
+        */
 }
 
 void read_line(FILE *file, char *buffer)

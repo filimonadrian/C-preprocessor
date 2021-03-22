@@ -277,3 +277,60 @@ void compute_defines(h_table *table, vector* words, char buffer[], int start_ind
 }
 
 
+void read_file(h_table *table, char *input_filename, char *output_filename)
+{
+        FILE *input_fp, *output_fp;
+        char buffer[LINE_SIZE];
+        char buffer_copy[LINE_SIZE];
+        char computed_string[LINE_SIZE]; 
+        int i = 0;
+
+
+        input_fp = fopen(input_filename, "r");
+        if (input_fp == NULL)
+                fprintf(stderr, "Cannot open %s file!\n", input_filename);
+
+        while (!feof(input_fp)) {
+
+                /* read one line from file */
+                memset(buffer, 0, LINE_SIZE);
+                fgets(buffer, LINE_SIZE, input_fp);
+                memcpy(buffer_copy, buffer, LINE_SIZE);
+
+                vector *words = create_vector(5);
+                for (i = 0; i < strlen(buffer); i++) {
+                        if (strncmp(buffer + i , "#define", 7) == 0) {
+                                
+                                split_defines(words, buffer);
+                                compute_defines(table, words);
+                                print_vector(words);
+                                break;
+                        }
+                }
+
+                split_defines(words, buffer);
+                if (strncmp(get_element(words, 1), "#define", 7) == 0) {
+                        compute_defines(words, buffer);
+                        print_vector(words);
+                }
+                delete_vector(words);
+
+                
+
+                /*
+                split_buffer(words, buffer_copy);
+                printf("%s", buffer);
+                *
+        print_vector(words);
+                */
+        }
+
+        fclose(input_fp);
+        /*
+        fclose(output_fp);
+        */
+}
+
+
+
+
