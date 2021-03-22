@@ -1,0 +1,96 @@
+==37975== Memcheck, a memory error detector
+==37975== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==37975== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==37975== Command: ./so-cpp _test/inputs/test10.in
+==37975== Parent PID: 37969
+==37975== 
+==37975== Invalid read of size 1
+==37975==    at 0x483EF54: strlen (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x48DB5B3: puts (ioputs.c:35)
+==37975==    by 0x10A16C: main (so-cpp.c:162)
+==37975==  Address 0x4a5cb16 is 0 bytes after a block of size 22 alloc'd
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x109DA1: parse_filename (so-cpp.c:88)
+==37975==    by 0x10A09B: read_arguments (so-cpp.c:132)
+==37975==    by 0x10A149: main (so-cpp.c:156)
+==37975== 
+==37975== Syscall param openat(filename) points to unaddressable byte(s)
+==37975==    at 0x4964EAB: open (open64.c:48)
+==37975==    by 0x48E7195: _IO_file_open (fileops.c:189)
+==37975==    by 0x48E7459: _IO_file_fopen@@GLIBC_2.2.5 (fileops.c:281)
+==37975==    by 0x48D9B0D: __fopen_internal (iofopen.c:75)
+==37975==    by 0x48D9B0D: fopen@@GLIBC_2.2.5 (iofopen.c:86)
+==37975==    by 0x10A61B: read_file (parser.c:82)
+==37975==    by 0x10A1A2: main (so-cpp.c:171)
+==37975==  Address 0x4a5cb16 is 0 bytes after a block of size 22 alloc'd
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x109DA1: parse_filename (so-cpp.c:88)
+==37975==    by 0x10A09B: read_arguments (so-cpp.c:132)
+==37975==    by 0x10A149: main (so-cpp.c:156)
+==37975== 
+==37975== 
+==37975== Process terminating with default action of signal 2 (SIGINT)
+==37975==    at 0x4964EA9: open (open64.c:48)
+==37975==    by 0x48E7195: _IO_file_open (fileops.c:189)
+==37975==    by 0x48E7459: _IO_file_fopen@@GLIBC_2.2.5 (fileops.c:281)
+==37975==    by 0x48D9B0D: __fopen_internal (iofopen.c:75)
+==37975==    by 0x48D9B0D: fopen@@GLIBC_2.2.5 (iofopen.c:86)
+==37975==    by 0x10A61B: read_file (parser.c:82)
+==37975==    by 0x10A1A2: main (so-cpp.c:171)
+==37975== 
+==37975== HEAP SUMMARY:
+==37975==     in use at exit: 80,678 bytes in 8 blocks
+==37975==   total heap usage: 9 allocs, 1 frees, 84,774 bytes allocated
+==37975== 
+==37975== 8 bytes in 1 blocks are still reachable in loss record 1 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x10943E: create_table (hashtable.c:22)
+==37975==    by 0x10A120: main (so-cpp.c:155)
+==37975== 
+==37975== 16 bytes in 1 blocks are still reachable in loss record 2 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x10A212: create_vector (vector.c:5)
+==37975==    by 0x10A0FF: main (so-cpp.c:153)
+==37975== 
+==37975== 16 bytes in 1 blocks are still reachable in loss record 3 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x10A240: create_vector (vector.c:8)
+==37975==    by 0x10A0FF: main (so-cpp.c:153)
+==37975== 
+==37975== 16 bytes in 1 blocks are still reachable in loss record 4 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x10A212: create_vector (vector.c:5)
+==37975==    by 0x10A112: main (so-cpp.c:154)
+==37975== 
+==37975== 22 bytes in 1 blocks are still reachable in loss record 5 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x109DA1: parse_filename (so-cpp.c:88)
+==37975==    by 0x10A09B: read_arguments (so-cpp.c:132)
+==37975==    by 0x10A149: main (so-cpp.c:156)
+==37975== 
+==37975== 128 bytes in 1 blocks are still reachable in loss record 6 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x10A240: create_vector (vector.c:8)
+==37975==    by 0x10A112: main (so-cpp.c:154)
+==37975== 
+==37975== 472 bytes in 1 blocks are still reachable in loss record 7 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x48D9AAD: __fopen_internal (iofopen.c:65)
+==37975==    by 0x48D9AAD: fopen@@GLIBC_2.2.5 (iofopen.c:86)
+==37975==    by 0x10A61B: read_file (parser.c:82)
+==37975==    by 0x10A1A2: main (so-cpp.c:171)
+==37975== 
+==37975== 80,000 bytes in 1 blocks are still reachable in loss record 8 of 8
+==37975==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==37975==    by 0x10944C: create_table (hashtable.c:25)
+==37975==    by 0x10A120: main (so-cpp.c:155)
+==37975== 
+==37975== LEAK SUMMARY:
+==37975==    definitely lost: 0 bytes in 0 blocks
+==37975==    indirectly lost: 0 bytes in 0 blocks
+==37975==      possibly lost: 0 bytes in 0 blocks
+==37975==    still reachable: 80,678 bytes in 8 blocks
+==37975==         suppressed: 0 bytes in 0 blocks
+==37975== 
+==37975== For lists of detected and suppressed errors, rerun with: -s
+==37975== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)

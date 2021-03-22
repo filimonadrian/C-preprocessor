@@ -1,37 +1,16 @@
 #include "so-cpp.h"
 
-/* function to check if string has '/0' */
-void print_string_decimal(char *str) {
-        int i = 0;
 
-        for (i = 0; i < strlen(str) + 1; i++) {
-                printf("%d ", str[i]);
-        }
-        printf("\n");
 
-        /*
-        for (i = 0; i < strlen(entry->key) + 1; i++) {
-                printf("%d ", entry->key[i]);
-        }
-
-        printf("\n");
-        
-        for (i = 0; i < strlen(entry->value) + 1; i++) {
-                printf("%d ", entry->value[i]);
-        }
-        */
-}
-
-entry_t* parse_symbol_mapping(char *str) {
-
+entry_t* parse_symbol_mapping(char *str)
+{
         size_t key_mapping = 0;
         size_t value_size = 0;
         size_t str_size = strlen(str);
         size_t i = 0;
 
-        entry_t *entry = NULL;
-        entry = malloc(sizeof(entry_t));
-        
+        entry_t *entry = malloc(sizeof(entry_t));
+
         for (i = 0; i < str_size; i++) {
                 if (str[i] == '=') {
                         /* set flag for mapping */
@@ -43,8 +22,8 @@ entry_t* parse_symbol_mapping(char *str) {
                         memcpy(entry->key, str, i);
                         
                         /* entry->key[i] = '\0';
-                        strncpy(entry->key, str, i);
-                        */
+                         *strncpy(entry->key, str, i);
+                         */
                         
                         /* copy value in entry and append '\0' */
                         value_size = str_size - i;
@@ -61,8 +40,8 @@ entry_t* parse_symbol_mapping(char *str) {
                 /* copy in key entire received string */ 
                 entry->key = malloc((str_size + 1) * sizeof(char));
                 /*
-                strcpy(entry->key, str);
-                */
+                 *strcpy(entry->key, str);
+                 */
                 memcpy(entry->key, str, str_size);
                 entry->key[str_size] = '\0';
 
@@ -75,11 +54,13 @@ entry_t* parse_symbol_mapping(char *str) {
 }
 
 
-void parse_path (vector *paths, char *str) {
+void parse_path(vector *paths, char *str)
+{
         insert_string(paths, str);
 }
 
-void parse_filename (char **filename, char *str) {
+void parse_filename(char **filename, char *str)
+{
         if (*filename == NULL) {
                 *filename = malloc(strlen(str) * sizeof(char));
                 memcpy(*filename, str, strlen(str));
@@ -88,9 +69,10 @@ void parse_filename (char **filename, char *str) {
         }
 }
 
-void read_arguments (h_table *table, vector *paths,
+void read_arguments(h_table *table, vector *paths,
                     char **output_file, char **input_file,
-                    int argc, char **argv) {
+                    int argc, char **argv)
+{
 
         int i = 0;
         entry_t *entry = NULL;
@@ -130,41 +112,51 @@ void read_arguments (h_table *table, vector *paths,
                 i++;
 
                 /*
-                print_string_decimal(entry->value);
-                print_string_decimal(entry->key);
-                */
+                 *print_string_decimal(entry->value);
+                 *print_string_decimal(entry->key);
+                 */
         }
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
         
         int i = 0;
         entry_t *entry = NULL;
-        char *output_file = NULL;
-        char *input_file = NULL;
-        
-        
-        vector *paths =  create_vector(2);
-        h_table *table = create_table(); 
-        read_arguments (table, paths, &output_file, &input_file, argc, argv);
+        char *output_filename = NULL;
+        char *input_filename = NULL;
+
+        vector *paths = create_vector(2);
+        vector *words = create_vector(8);
+        h_table *table = create_table();
         
 
-        if (input_file == NULL) {
-                printf("it's fucking NULL\n");
-        } else {
-                printf("%s\n", input_file);
+        read_arguments(table, paths, &output_filename, &input_filename, argc, argv);
+
+        if (input_filename != NULL) {
+                printf("%s\n", input_filename);
         }
 
-        if (output_file == NULL) {
-                printf("it's fucking NULL\n");
-        } else {
-                printf("%s\n", output_file);
-        }
+        if (output_filename != NULL)
+                printf("%s\n", output_filename);
 
+
+        read_file(table, input_filename, output_filename);
+
+        printf("Tabelul este: \n");
+        print_table(table);
+
+        /*
+         *
+
+        print_vector(words);
+         */
+
+        /*
         print_vector(paths);
         print_table(table);
-        /*
+
+
         printf("%s\n", output_file);
         
         char *aux = malloc(aux_size * sizeof(char));
@@ -172,41 +164,12 @@ int main (int argc, char **argv)
         size_t aux_size = LINE_SIZE;
         */
 
-        /* 
 
-        
-        printf("key: %s, value: %s\n", entry->key, entry->value); 
-        printf("%d, %d\n", paths->size, paths->capacity);
-        */
 
-        /*
-        h_table *table = create_table();
-
-        insert_string(paths, "11111");
-        insert_string(paths, "22222");
-        insert_string(paths, "33333");
-        insert_string(paths, "44444");
-        insert_string(paths, "55555");
-        insert_string(paths, "666666");
-        insert_string(paths, "777777");
-
-        insert_entry(table, "name1", "em");
-        insert_entry(table, "name2", "russian");
-        insert_entry(table, "name3", "pizza asdfasd fasd fasdf ");
-        insert_entry(table, "name4", "paste");
-        insert_entry(table, "name5", "merc adsfasd fasd fsad sad fdass");
-        insert_entry(table, "name6", "bmw asdfasd asd fas d fs");
-        insert_entry(table, "name7", "audi");
-        insert_entry(table, "name7", "audix7");
-        insert_entry(table, "name8", "pandemie asdfas dasf asd as f");
-        insert_entry(table, "name9", "uliuuu");
-        print_table(table);
-
-        */
-
-        free(input_file);
-        free(output_file);
+        free(input_filename);
+        free(output_filename);
         delete_vector(paths);
+        delete_vector(words);
         delete_table(table); 
 
 

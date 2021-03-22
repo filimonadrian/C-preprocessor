@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-g -Wall -std=c89
-FILES= hashtable.c so-cpp.c vector.c
+FILES= hashtable.c so-cpp.c vector.c parser.c
 
 so-cpp: $(FILES)
 	$(CC) -o so-cpp $(FILES) $(CFLAGS)

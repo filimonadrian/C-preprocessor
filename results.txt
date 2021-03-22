@@ -1,0 +1,88 @@
+./so-cpp.c:14: WARNING:BLOCK_COMMENT_STYLE: Block comments use * on subsequent lines
+./hashtable.c:28: WARNING:BRACES: braces {} are not necessary for single statement blocks
+./so-cpp.h:13: ERROR:CODE_INDENT: code indent should use tabs where possible
+./hashtable.h:20: ERROR:FUNCTION_WITHOUT_ARGS: Bad function definition - h_table *create_table() should probably be h_table *create_table(void)
+./so-cpp.h:13: WARNING:LEADING_SPACE: please, no spaces at the start of a line
+./hashtable.c:39: WARNING:LINE_SPACING: Missing a blank line after declarations
+./hashtable.h:27: WARNING:MISSING_EOF_NEWLINE: adding a line without newline at end of file
+./hashtable.c:83: ERROR:OPEN_BRACE: open brace '{' following function definitions go on the next line
+./hashtable.h:25: ERROR:POINTER_LOCATION: "foo* bar" should be "foo *bar"
+./so-cpp.h:10: WARNING:SPACING: space prohibited between function name and open parenthesis '('
+./parser.c:11: WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (8, 12)
+./so-cpp.h:14: ERROR:TRAILING_WHITESPACE: trailing whitespace
+00) Sources check...........................................failed  [ 0/95]
+01) Test bad input..........................................passed  [01/95]
+02) Test bad parameters.....................................passed  [01/95]
+_test/inputs/test3.in
+it's fucking NULL
+input error file 
+ 
+ 
+03) Test multiple files.....................................failed  [ 0/95]
+_test/outputs/test4.out vs _test/outputs/test4.ref:
+--- _test/outputs/test4.out	2021-03-20 19:49:20.167363215 +0200
++++ _test/outputs/test4.ref	2021-03-20 19:49:19.787363224 +0200
+@@ -1,2 +1 @@
+-it's fucking NULL
+-it's fucking NULL
++file passed through standard input
+04) Test stdin file.........................................failed  [ 0/95]
+04) Test stdin file - memcheck..............................failed  [ 0/95]
+_test/outputs/test5.out vs _test/outputs/test5.ref:
+--- _test/outputs/test5.out	2021-03-20 19:49:21.299363186 +0200
++++ _test/outputs/test5.ref	2021-03-20 19:49:20.935363195 +0200
+@@ -1,5 +1 @@
+-_test/inputs/test5.in
+-it's fucking NULL
+ file passed through parameter 
+- 
+- 
+05) Test simple file........................................failed  [ 0/95]
+05) Test simple file - memcheck.............................failed  [ 0/95]
+_test/inputs/test6.in
+it's fucking NULL
+file passed as output 
+ 
+ 
+_test/outputs/test6.out vs _test/outputs/test6.ref:
+06) Test simple out file....................................failed  [ 0/95]
+06) Test simple out file - memcheck.........................failed  [ 0/95]
+_test/outputs/test7.out vs _test/outputs/test7.ref:
+--- _test/outputs/test7.out	2021-03-20 19:49:22.087363166 +0200
++++ _test/outputs/test7.ref	2021-03-20 19:49:21.715363175 +0200
+@@ -1,12 +1,5 @@
+-_test/inputs/test7.in
+-it's fucking NULL
+-#define VAR0 1 
+- 
+- int main 
+- int y VAR0 1 
+- printf " d\n" VAR0 
+07) Test simple define......................................failed  [ 0/95]
+07) Test simple define - memcheck...........................failed  [ 0/95]
+_test/outputs/test8.out vs _test/outputs/test8.ref:
+--- _test/outputs/test8.out	2021-03-20 19:49:22.483363156 +0200
++++ _test/outputs/test8.ref	2021-03-20 19:49:22.119363165 +0200
+@@ -1,10 +1,5 @@
+-_test/inputs/test8.in
+-it's fucking NULL
+-int main 
+- int y VAR0 1 
+- printf " d\n" VAR0 
+- 
+- return 0 
+08) Test param define.......................................failed  [ 0/95]
+08) Test param define - memcheck............................failed  [ 0/95]
+_test/outputs/test9.out vs _test/outputs/test9.ref:
+--- _test/outputs/test9.out	2021-03-20 19:49:22.871363146 +0200
++++ _test/outputs/test9.ref	2021-03-20 19:49:22.507363155 +0200
+@@ -1,14 +1,6 @@
+-_test/inputs/test9.in
+-it's fucking NULL
+-#define VAR0 1 
+- 
+- int main 
+- int y VAR0 1 
+- printf " d\n" VAR0 
+09) Test simple define/undef................................failed  [ 0/95]
+09) Test simple define/undef - memcheck.....................failed  [ 0/95]

@@ -1,0 +1,29 @@
+#define VAR0 1
+#define ABC 10
+#define ABCD 2
+#define BCD ABC + 15
+#define DDD "10"
+#define EEE 20 + 4
+
+#define VAR0 1 \
+        + 2\
+        + 3\
+        + 4
+
+
+int func()
+{
+    printf("%d\n", ABC);
+    int x = BCD + 20;
+
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    int y = VAR0 + 1;
+    printf("VAR0 = %d\n", VAR0);
+ 
+    return 0;
+}
+

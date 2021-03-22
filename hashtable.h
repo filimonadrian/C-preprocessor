@@ -16,12 +16,12 @@ typedef struct h_table {
         entry_t **entries;
 } h_table;
 
-unsigned int hash (char *key);
-h_table *create_table();
+unsigned int hash(char *key);
+h_table *create_table(void);
 entry_t *create_pair(char *key, char *value);
 void insert_pair(h_table *table, char *key, char *value);
-void insert_entry (h_table *table, entry_t *entry);
-char *get_entry(h_table *table, char *key);
-void delete_entry(h_table* table, char *key);
-void delete_table(h_table* table);
+void insert_entry(h_table *table, entry_t *entry);
+char *get_value(h_table *table, char *key);
+void delete_entry(h_table *table, char *key);
+void delete_table(h_table *table);
 void print_table(h_table *table);
