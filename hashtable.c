@@ -43,9 +43,9 @@ entry_t *create_pair(char *key, char *value)
         memcpy(entry->key, key, strlen(key));
         memcpy(entry->value, value, strlen(value));
         /*
-        strcpy(entry->key, key);
-        strcpy(entry->value, value);
-        */
+         *strcpy(entry->key, key);
+         *strcpy(entry->value, value);
+         */
         entry->next = NULL;
 
         return entry;
@@ -91,6 +91,10 @@ void insert_entry(h_table *table, entry_t *entry)
         entry_t *prev_neigh = NULL;
         entry_t *trailer = NULL;
 
+        if (entry == NULL) {
+                return;
+        }
+
         hashcode = hash(entry->key);
 
         /* insert entry if does not already exist a slot with its hashcode */
@@ -100,7 +104,6 @@ void insert_entry(h_table *table, entry_t *entry)
                 return;
         }
 
-        
         /* update the value if the entry exists in the list of a slot*/
         while (trailer != NULL) {
                 if (strcmp(trailer->key, entry->key) == 0) {
@@ -108,9 +111,11 @@ void insert_entry(h_table *table, entry_t *entry)
                         free(trailer->key);
                         entry->next = trailer->next;
                         trailer = entry;
+                        /*
+                        prev_neigh->next = entry;
+                        */
                         return;
                 }
-                
                 prev_neigh = trailer;
                 trailer = prev_neigh->next;
         }
@@ -120,7 +125,7 @@ void insert_entry(h_table *table, entry_t *entry)
 
 char *get_value(h_table *table, char *key)
 {
-        entry_t *entry = NULL; 
+        entry_t *entry = NULL;
         int hashcode = 0;
 
         hashcode = hash(key);
@@ -133,7 +138,7 @@ char *get_value(h_table *table, char *key)
         while (entry != NULL) {
                 if (strcmp(entry->key, key) == 0)
                         return entry->value;
-                
+
                 entry = entry->next;
         }
 
@@ -144,7 +149,7 @@ char *get_value(h_table *table, char *key)
 void delete_entry(h_table *table, char *key)
 {
         int hashcode = 0;
-        int index_list = 0; 
+        int index_list = 0;
         entry_t *entry = NULL;
         entry_t *prev_neigh = NULL;
 
@@ -186,21 +191,19 @@ void delete_entry(h_table *table, char *key)
 
 void delete_table(h_table *table)
 {
-        entry_t *entry = NULL;
-        entry_t *aux = NULL;
         int i = 0;
 
         for (i = 0; i < TABLE_SIZE; i++) {
-                if (table->entries[i] != NULL) {
-                        entry = table->entries[i];
-                        while (entry != NULL) {
-                                aux = entry;
-                                entry = entry->next;
-                                /* free space for entry */
-                                free(aux->key);
-                                free(aux->value);
-                                free(aux);
-                        }
+                entry_t *aux = NULL;
+
+                aux = table->entries[i];
+                while (table->entries[i]) {
+                        aux = table->entries[i];
+                        table->entries[i] = table->entries[i]->next;
+                        /* free space for entry */
+                        free(aux->key);
+                        free(aux->value);
+                        free(aux);
                 }
         }
         free(table->entries);
@@ -211,7 +214,6 @@ void print_table(h_table *table)
 {
         int i = 0;
         entry_t *entry = NULL;
-        
 
         for (i = 0; i < TABLE_SIZE; i++) {
                 entry = table->entries[i];

@@ -242,36 +242,6 @@ void compute_defines(h_table *table, vector* words, char buffer[], int start_ind
         }
 
 
-
-        if (words->size == 3) {
-                insert_pair(table, words->arr[1], words->arr[2]);
-                return;
-        }
-        
-        if (words->size > 3) {
-        }
-
-        for (i = 2; i < words->size; i++) {
-                char *word = get_element(words, i);
-                char *value = NULL;
-                
-                if (word[0] == '(') {
-                        value = get_value(table, word + 1);
-                        aux[aux_size] = '(';
-                        aux_size++;
-                } else {
-                        value = get_value(table, word);
-                }
-
-                if (value == NULL) {
-                        memcpy(aux + aux_size, word + aux_size, strlen(value));
-                } else {
-                        memcpy(aux + aux_size, value, strlen(value));
-                        aux_size += strlen(value);
-
-                }
-        }
-
         insert_pair(table, get_element(words, 1), aux);
 
 }

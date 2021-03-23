@@ -46,6 +46,7 @@ void delete_vector(vector *v)
 
         free(v->arr);
         free(v);
+        v = NULL;
 }
 
 void print_vector(vector *v)
