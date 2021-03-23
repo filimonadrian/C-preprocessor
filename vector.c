@@ -54,7 +54,7 @@ void print_vector(vector *v)
         int i = 0;
 
         for (i = 0; i < v->size; i++)
-                printf("%s ", v->arr[i]);
+                printf("%s_ ", v->arr[i]);
 
         printf("\n");
 }

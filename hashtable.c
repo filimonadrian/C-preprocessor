@@ -181,6 +181,7 @@ void delete_entry(h_table *table, char *key)
                         free(entry->key);
                         free(entry->value);
                         free(entry);
+                        return;
                 }
 
                 prev_neigh = entry;

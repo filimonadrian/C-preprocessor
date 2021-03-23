@@ -93,8 +93,7 @@ int read_arguments(h_table *table, vector *paths,
                         /* printf("%s\n", argv[i]); */
 
                 } else if (strncmp(argv[i], "-D", 2) == 0) {
-
-                        parse_symbol_mapping(argv[i] + 2);
+                        entry = parse_symbol_mapping(argv[i] + 2);
                         insert_entry(table, entry);
 
                         /* printf("%s\n", argv[i] + 2); */
@@ -142,6 +141,7 @@ int main(int argc, char **argv)
         vector *paths = create_vector(8);
         vector *words = create_vector(8);
         h_table *table = create_table();
+
 
         ret = read_arguments(table, paths, &output_filename, &input_filename, argc, argv);
         if (ret > 0) {
