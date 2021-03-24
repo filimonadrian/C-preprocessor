@@ -16,3 +16,7 @@ void replace_word(char *str, char *result, char *old_word, char *new_word, int s
 void compute_code(h_table *table, vector *words, char buffer[]);
 void compute_undef(h_table *table, vector *words);
 void compute_if(h_table *table, vector *words, int *condition);
+int compute_directives(h_table *table, vector *define_words,
+                        vector *code_words, vector *paths,
+                        char *buffer, char *input_filename,
+                        FILE *output_fp, int *condition);

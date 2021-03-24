@@ -70,10 +70,12 @@ void insert_pair(h_table *table, char *key, char *value)
         /* update the value if the entry exists in the list of a slot*/
         while (trailer != NULL) {
                 if (strcmp(trailer->key, key) == 0) {
+                        /*
                         free(trailer->value);
                         trailer->value = malloc(strlen(value) + 1);
                         memset(trailer->value, 0, strlen(value) + 1);
                         memcpy(trailer->value, value, strlen(value));
+                        */
                         return;
                 }
 
@@ -107,11 +109,11 @@ void insert_entry(h_table *table, entry_t *entry)
         /* update the value if the entry exists in the list of a slot*/
         while (trailer != NULL) {
                 if (strcmp(trailer->key, entry->key) == 0) {
+                        /*
                         free(trailer->value);
                         free(trailer->key);
                         entry->next = trailer->next;
                         trailer = entry;
-                        /*
                         prev_neigh->next = entry;
                         */
                         return;
