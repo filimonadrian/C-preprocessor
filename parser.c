@@ -203,11 +203,44 @@ int file_exists(char *include_file)
         return 0;
 }
 
-int compute_include(vector *paths, char *input_filename, vector *words)
+void create_include_path(char *dir_path, char *include_filename, char *include_path)
+{
+        strcat(include_path, dir_path);
+        strcat(include_path, "/");
+        strcat(include_path, include_filename);
+
+}
+
+int read_write_headers(char *include_path, FILE *output_fp)
+{
+        char buffer[LINE_SIZE];
+        FILE *include_fp = NULL;
+
+        include_fp = fopen(include_path, "r");
+        if (include_fp == NULL) {
+                fprintf(stderr, "Cannot open %s file!\n", include_path);
+                return 1;
+        }
+
+        while (!feof(include_fp)) {
+                memset(buffer, 0, LINE_SIZE);
+                fgets(buffer, LINE_SIZE, include_fp);
+
+                fwrite(buffer, strlen(buffer), 1, output_fp);
+        }
+
+        fclose(include_fp);
+        return 0;
+}
+
+int compute_include(vector *paths, char *input_filename, vector *words, FILE *output_fp)
 {
         char input_file_path[LINE_SIZE];
         char filename_from_include[LINE_SIZE];
         char include_path[LINE_SIZE];
+        int i = 0;
+        int ret = 0;
+        
 
         memset(input_file_path, 0, LINE_SIZE);
         memset(filename_from_include, 0, LINE_SIZE);
@@ -230,9 +263,22 @@ int compute_include(vector *paths, char *input_filename, vector *words)
                 strlen(filename_from_include));
 
         
-        if (file_exists(include_path) == 0) {
+        if (file_exists(include_path) == 0 && paths->size == 0) {
                 return 1;
+        } else if (file_exists(include_path) == 1) {
+                return read_write_headers(include_path, output_fp);
         }
+
+        for (i = 0; i < paths->size; i++) {
+                memset(include_path, 0, LINE_SIZE);
+                create_include_path(get_element(paths, i), filename_from_include, include_path);
+                if (file_exists(include_path) == 1) {
+                        ret =  read_write_headers(include_path, output_fp);
+                        if (ret != 0) {
+                                return ret;
+                        }
+                }
+        }      
 
         return 0;
 }
@@ -327,20 +373,11 @@ int read_file(h_table *table, vector *paths, char *input_filename, char *output_
                 } else if (strncmp(get_element(define_words, 0), "#endif", 6) == 0) {
                         condition = 1;
                 } else if (strncmp(get_element(define_words, 0), "#include", 8) == 0) {
-                        ret = compute_include(paths, input_filename, define_words);
+                        ret = compute_include(paths, input_filename, define_words, output_fp);
                         if(ret)
                                 goto free_vectors;
 
                 } else {
-                        /*
-                        print_vector(define_words);
-                        printf("%s", computed_string);
-                        
-                        print_vector(code_words);
-                        printf("Buffer: %s\n", buffer);
-                        */
-
-
                         memset(computed_string, 0, LINE_SIZE);
                         memcpy(computed_string, 
                                 compute_code(table, code_words, buffer), 

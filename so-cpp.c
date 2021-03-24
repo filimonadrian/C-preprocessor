@@ -158,28 +158,6 @@ int main(int argc, char **argv)
         if (ret > 0) {
                 goto free_memory;
         }
-        
-        
-
-        /*
-         *
-        print_table(table);
-
-        print_vector(words);
-         */
-
-        /*
-        print_vector(paths);
-
-
-        printf("%s\n", output_file);
-
-        char *aux = malloc(aux_size * sizeof(char));
-        memset(aux, 0, aux_size);
-        size_t aux_size = LINE_SIZE;
-        print_table(table);
-        */
-
 
 free_memory:
         free(input_filename);
