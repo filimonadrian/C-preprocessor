@@ -168,19 +168,6 @@ char *compute_code(h_table *table, vector *words, char buffer[])
                         char *aux = strstr(buffer + start_buf, key );
                         if (aux != NULL) {
                                 size_counter = aux - buffer - 1;
-
-
-                                /*
-                                printf("size_counter: %d_____\n",  size_counter);
-                                printf("start_buf: %d_____\n",  start_buf);
-                                printf("strlen(buffer): %d_____\n",  strlen(buffer));
-
-                                
-                                start_buf = aux - buffer + strlen(key) - start_key;
-                                printf("start_buf: %d_____\n",  start_buf);
-                                printf("start_keuy: %d_____\n",  start_key);
-                        printf("RES: %s\n", buffer);
-                                */
                         }
                         replace_word(buffer, result, key, value, size_counter);
                         memcpy(buffer, result, LINE_SIZE);
@@ -240,78 +227,76 @@ int read_file(h_table *table, char *input_filename, char *output_filename)
                 memcpy(buffer_copy2, buffer, LINE_SIZE);
 
                 split_defines(define_words, buffer_copy1);
+
+                if (define_words->size <= 0) {
+                        goto free_vectors;
+                }
+
                 if (condition == 0 &&
                         strncmp(get_element(define_words, 0), "#endif", 6) != 0 &&
                         strncmp(get_element(define_words, 0), "#elif", 5) != 0 &&
                         strncmp(get_element(define_words, 0), "#else", 5) != 0){
-                        delete_vector(define_words);
-                        delete_vector(code_words);
-                        continue;
+                        goto free_vectors;
                 }
                 
                 split_line(code_words, buffer_copy2);
 
-                if (define_words->size > 0) {
 
-                        if (strncmp(get_element(define_words, 0), "#define", 7) == 0) {
-                                compute_defines(table, define_words, key);
-                        } else if (strncmp(get_element(define_words, 0), "#undef", 6) == 0) {
-                                compute_undef(table, define_words);
+                if (strncmp(get_element(define_words, 0), "#define", 7) == 0) {
+                        compute_defines(table, define_words, key);
+                } else if (strncmp(get_element(define_words, 0), "#undef", 6) == 0) {
+                        compute_undef(table, define_words);
 
-                        } else if (strncmp(get_element(define_words, 0), "+", 1) == 0) {
+                } else if (strncmp(get_element(define_words, 0), "+", 1) == 0) {
 
-                        } else if (strncmp(get_element(define_words, 0), "#ifdef", 6) == 0) {
-                                compute_ifdef(table, define_words, &condition);
+                } else if (strncmp(get_element(define_words, 0), "#ifdef", 6) == 0) {
+                        compute_ifdef(table, define_words, &condition);
 
-                        } else if (strncmp(get_element(define_words, 0), "#ifndef", 7) == 0) {
-                                compute_ifdef(table, define_words, &condition);
-                                condition = !condition;
+                } else if (strncmp(get_element(define_words, 0), "#ifndef", 7) == 0) {
+                        compute_ifdef(table, define_words, &condition);
+                        condition = !condition;
 
-                        } else if (strncmp(get_element(define_words, 0), "#if", 3) == 0) {
-                                compute_if(table, define_words, &condition);
-                                
+                } else if (strncmp(get_element(define_words, 0), "#if", 3) == 0) {
+                        compute_if(table, define_words, &condition);
+                        
 
-                        } else if (strncmp(get_element(define_words, 0), "#else", 5) == 0) {
-                                if (condition == 1) {
-                                        condition = 0;
-                                } else {
-                                        condition = 1;
-                                }
-                        } else if (strncmp(get_element(define_words, 0), "#elif", 5) == 0) {
-                                compute_if(table, define_words, &condition);
-
-                        } else if (strncmp(get_element(define_words, 0), "#endif", 6) == 0) {
-                                condition = 1;
+                } else if (strncmp(get_element(define_words, 0), "#else", 5) == 0) {
+                        if (condition == 1) {
+                                condition = 0;
                         } else {
-                                /*
-                                print_vector(define_words);
-                                printf("%s", computed_string);
-                                
-                                print_vector(code_words);
-                                printf("Buffer: %s\n", buffer);
-                                */
-
-
-                                memset(computed_string, 0, LINE_SIZE);
-                                memcpy(computed_string, 
-                                        compute_code(table, code_words, buffer), 
-                                        LINE_SIZE);
-                                if (strncmp(computed_string, "\n", 1)) {
-                                        fwrite(computed_string, strlen(computed_string), 1, output_fp);
-                                }
+                                condition = 1;
                         }
-                } 
-                delete_vector(define_words);
-                delete_vector(code_words);
+                } else if (strncmp(get_element(define_words, 0), "#elif", 5) == 0) {
+                        compute_if(table, define_words, &condition);
 
-                /*
-                split_buffer(words, buffer_copy);
-                printf("%s", buffer);
-                *
-                if (code_words != NULL) {
-                        delete_vector(code_words);
+                } else if (strncmp(get_element(define_words, 0), "#endif", 6) == 0) {
+                        condition = 1;
+                } else if (strncmp(get_element(define_words, 0), "#include", 6) == 0) {
+                        print_vector(define_words);
+                        
+                } else {
+                        /*
+                        print_vector(define_words);
+                        printf("%s", computed_string);
+                        
+                        print_vector(code_words);
+                        printf("Buffer: %s\n", buffer);
+                        */
+
+
+                        memset(computed_string, 0, LINE_SIZE);
+                        memcpy(computed_string, 
+                                compute_code(table, code_words, buffer), 
+                                LINE_SIZE);
+                        if (strncmp(computed_string, "\n", 1)) {
+                                fwrite(computed_string, strlen(computed_string), 1, output_fp);
+                        }
                 }
-                */
+                
+
+                free_vectors:
+                        delete_vector(define_words);
+                        delete_vector(code_words);
         }
 
 
