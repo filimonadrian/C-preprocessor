@@ -124,7 +124,7 @@ void replace_word(char *str, char *result, char *old_word, char *new_word, int s
                 strlen(str) - start_index + old_word_size);
 }
 
-char *compute_code(h_table *table, vector *words, char buffer[])
+void compute_code(h_table *table, vector *words, char *buffer)
 {
         int i = 0;
         int size_counter = 0;
@@ -174,7 +174,9 @@ char *compute_code(h_table *table, vector *words, char buffer[])
                 }
                 start_buf += strlen(key);
         }
+        /*
         return buffer;
+        */
 }
 
 void extract_path(char *filename, char *path)
@@ -269,6 +271,7 @@ int compute_include(vector *paths, char *input_filename, vector *words, FILE *ou
                 return read_write_headers(include_path, output_fp);
         }
 
+        /* find file in dirs received as parameter */
         for (i = 0; i < paths->size; i++) {
                 memset(include_path, 0, LINE_SIZE);
                 create_include_path(get_element(paths, i), filename_from_include, include_path);
@@ -283,14 +286,80 @@ int compute_include(vector *paths, char *input_filename, vector *words, FILE *ou
         return 0;
 }
 
-int read_file(h_table *table, vector *paths, char *input_filename, char *output_filename)
+int compute_directives(h_table *table, vector *define_words,
+                        vector *code_words, vector *paths,
+                        char *buffer, char *input_filename,
+                        FILE *output_fp, int *condition)
+{
+        int ret = 0;
+        char key[LINE_SIZE];
+
+        if (define_words->size <= 0)
+                goto free_vectors;
+
+        if (*condition == 0 &&
+                strncmp(get_element(define_words, 0), "#endif", 6) != 0 &&
+                strncmp(get_element(define_words, 0), "#elif", 5) != 0 &&
+                strncmp(get_element(define_words, 0), "#else", 5) != 0) {
+                goto free_vectors;
+        }
+        
+        if (strncmp(get_element(define_words, 0), "#define", 7) == 0) {
+                compute_defines(table, define_words, key);
+
+        } else if (strncmp(get_element(define_words, 0), "#undef", 6) == 0) {
+                compute_undef(table, define_words);
+
+        } else if (strncmp(get_element(define_words, 0), "+", 1) == 0) {
+
+        } else if (strncmp(get_element(define_words, 0), "#ifdef", 6) == 0) {
+                compute_ifdef(table, define_words, condition);
+
+        } else if (strncmp(get_element(define_words, 0), "#ifndef", 7) == 0) {
+                compute_ifdef(table, define_words, condition);
+                *condition = !(*condition);
+
+        } else if (strncmp(get_element(define_words, 0), "#if", 3) == 0) {
+                compute_if(table, define_words, condition);
+
+        } else if (strncmp(get_element(define_words, 0), "#else", 5) == 0) {
+                if (*condition == 1) {
+                        *condition = 0;
+                } else {
+                        *condition = 1;
+                }
+        } else if (strncmp(get_element(define_words, 0), "#elif", 5) == 0) {
+                compute_if(table, define_words, condition);
+
+        } else if (strncmp(get_element(define_words, 0), "#endif", 6) == 0) {
+                *condition = 1;
+
+        } else if (strncmp(get_element(define_words, 0), "#include", 8) == 0) {
+                ret = compute_include(paths, input_filename, define_words, output_fp);
+                if(ret)
+                        goto free_vectors;
+
+        } else {
+                compute_code(table, code_words, buffer);
+                write_line(output_fp, buffer);
+        }
+
+        free_vectors:
+                delete_vector(define_words);
+                delete_vector(code_words);
+                
+        return ret;
+}
+
+
+
+int process_files(h_table *table, vector *paths, char *input_filename, char *output_filename)
 {
         FILE *input_fp, *output_fp;
         char buffer[LINE_SIZE];
         char buffer_copy1[LINE_SIZE];
         char buffer_copy2[LINE_SIZE];
-        char computed_string[LINE_SIZE];
-        char key[LINE_SIZE];
+        
         int condition = 1, ret = 0;
 
         if (strcmp(input_filename, "stdin") == 0) {
@@ -320,85 +389,23 @@ int read_file(h_table *table, vector *paths, char *input_filename, char *output_
                 vector *define_words = create_vector(5);
                 vector *code_words = create_vector(5);
 
-                /* read one line from file */
-                memset(buffer, 0, LINE_SIZE);
-                fgets(buffer, LINE_SIZE, input_fp);
-                
+                read_line(input_fp, buffer);
+
                 memcpy(buffer_copy1, buffer, LINE_SIZE);
                 memcpy(buffer_copy2, buffer, LINE_SIZE);
 
                 split_defines(define_words, buffer_copy1);
-
-                if (define_words->size <= 0) {
-                        goto free_vectors;
-                }
-
-                if (condition == 0 &&
-                        strncmp(get_element(define_words, 0), "#endif", 6) != 0 &&
-                        strncmp(get_element(define_words, 0), "#elif", 5) != 0 &&
-                        strncmp(get_element(define_words, 0), "#else", 5) != 0){
-                        goto free_vectors;
-                }
-                
                 split_line(code_words, buffer_copy2);
 
-
-                if (strncmp(get_element(define_words, 0), "#define", 7) == 0) {
-                        compute_defines(table, define_words, key);
-                } else if (strncmp(get_element(define_words, 0), "#undef", 6) == 0) {
-                        compute_undef(table, define_words);
-
-                } else if (strncmp(get_element(define_words, 0), "+", 1) == 0) {
-
-                } else if (strncmp(get_element(define_words, 0), "#ifdef", 6) == 0) {
-                        compute_ifdef(table, define_words, &condition);
-
-                } else if (strncmp(get_element(define_words, 0), "#ifndef", 7) == 0) {
-                        compute_ifdef(table, define_words, &condition);
-                        condition = !condition;
-
-                } else if (strncmp(get_element(define_words, 0), "#if", 3) == 0) {
-                        compute_if(table, define_words, &condition);
-                        
-
-                } else if (strncmp(get_element(define_words, 0), "#else", 5) == 0) {
-                        if (condition == 1) {
-                                condition = 0;
-                        } else {
-                                condition = 1;
-                        }
-                } else if (strncmp(get_element(define_words, 0), "#elif", 5) == 0) {
-                        compute_if(table, define_words, &condition);
-
-                } else if (strncmp(get_element(define_words, 0), "#endif", 6) == 0) {
-                        condition = 1;
-                } else if (strncmp(get_element(define_words, 0), "#include", 8) == 0) {
-                        ret = compute_include(paths, input_filename, define_words, output_fp);
-                        if(ret)
-                                goto free_vectors;
-
-                } else {
-                        memset(computed_string, 0, LINE_SIZE);
-                        memcpy(computed_string, 
-                                compute_code(table, code_words, buffer), 
-                                LINE_SIZE);
-                        if (strncmp(computed_string, "\n", 1)) {
-                                fwrite(computed_string, strlen(computed_string), 1, output_fp);
-                        }
-                }
-                
-
-                free_vectors:
-                        delete_vector(define_words);
-                        delete_vector(code_words);
-                        if (ret)
-                                goto close_files;
+                ret = compute_directives(table, define_words, code_words, paths,
+                                        buffer, input_filename, output_fp, &condition);
+                if (ret)
+                        break;
 
         }
 
-        close_files:
-                fclose(input_fp);
-                fclose(output_fp);
+        fclose(input_fp);
+        fclose(output_fp);
         return ret;
 }
 
@@ -407,13 +414,16 @@ void read_line(FILE *file, char *buffer)
         if (file == NULL)
                 return;
 
-        if (feof(file)) {
-                buffer = NULL;
-                return;
-        }
+        memset(buffer, 0, LINE_SIZE);
+        fgets(buffer, LINE_SIZE, file);
+}
 
-        while (!feof(file)) {
-                memset(buffer, 0, LINE_SIZE);
-                fgets(buffer, LINE_SIZE, file);
+void write_line(FILE *file, char *buffer)
+{
+        if (file == NULL)
+                return;
+
+        if (strncmp(buffer, "\n", 1)) {
+                fwrite(buffer, strlen(buffer), 1, file);
         }
 }
