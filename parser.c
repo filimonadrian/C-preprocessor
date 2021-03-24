@@ -5,7 +5,7 @@ void split_line(vector *words, char buffer[])
         char* token = strtok(buffer, "\n\t []{}<>=-*+/\%!&|^.,:;()."); 
         while (token != NULL) { 
                 /*
-                printf("%s\n", token);
+                printf("_%s_\n", token);
                 */
                 if (strcmp(token, "\n") != 0)
                         insert_string(words, token);
@@ -26,8 +26,6 @@ void split_defines(vector *words, char buffer[])
                 insert_string(words, token);
                 token = strtok(NULL, "\n\t "); 
         }
-        /*
-        */
 }
 
 void compute_defines(h_table *table, vector *words, char *key)
@@ -87,24 +85,6 @@ void compute_undef(h_table *table, vector *words)
         }
 }
 
-int check_number(char *str) {
-        int i = 0;
-        int result = 0;
-        
-        if (str == NULL) {
-                return 0;
-        }
-
-        for (i = 0; i < strlen(str); i++) {
-                if (str[i] >= '0' && str[i] <= '9') {
-                        result = result * 10 + (str[i] - '0');
-                } else {
-                        return 0;
-                }
-        }
-        return result;
-}
-
 void compute_if(h_table *table, vector *words, int *condition)
 {
         if (words->size == 2) {
@@ -136,17 +116,11 @@ void replace_word(char *str, char *result, char *old_word, char *new_word, int s
         int old_word_size = strlen(old_word);
         int result_size = strlen(str) + strlen(new_word) - strlen(old_word);
 
-        /*
-        char *result;
-        result = malloc(strlen(str) + strlen(new_word) - strlen(old_word));
-        return result;
-        */
-
         memset(result, 0, result_size);
         memcpy(result, str, start_index + 1);
         memcpy(result + start_index + 1, new_word, new_word_size);
         memcpy(result + start_index + 1 + new_word_size,
-                str + start_index + old_word_size + 1, 
+                str + start_index + old_word_size + 1,
                 strlen(str) - start_index + old_word_size);
 }
 
@@ -154,33 +128,64 @@ char *compute_code(h_table *table, vector *words, char buffer[])
 {
         int i = 0;
         int size_counter = 0;
+        int start_key = 0;
+        int start_buf = 0;
         char result[LINE_SIZE];
         memset(result, 0, LINE_SIZE);
 
         for (i = 0; i < words->size; i++) {
                 char *key = get_element(words, i);
+                start_key = 0;
+                
 
                 if (strncmp(key, "//", 2) == 0) {
                         break;
                 }
-                /*
+                
+                /* if it's the first occurence of " */
                 if (key[0] == '"') {
+                        start_key++;
+                        /* if the second " is in the same word pass it */
+                        if (strchr(key + 1, '"') != NULL) {
+                                start_buf += strlen(key);
+                                i++;
+                                break;
+                        }
+                        /* escape all words between " */
                         while (i < words->size) {
-                                if (key[strlen(key) - 1] == '"')
+                                if (strchr(get_element(words, i) + start_key, '"') != NULL) {
                                         break;
+                                }
+                                start_buf += strlen(key);
                                 i++;
                         }
                 }
-                */
 
                 char *value = get_value(table, key);
+
                 if (value != NULL) {
-                        char *aux = strstr(buffer, key);
-                        if (aux)
+                        
+                        char *aux = strstr(buffer + start_buf, key );
+                        if (aux != NULL) {
                                 size_counter = aux - buffer - 1;
+
+
+                                /*
+                                printf("size_counter: %d_____\n",  size_counter);
+                                printf("start_buf: %d_____\n",  start_buf);
+                                printf("strlen(buffer): %d_____\n",  strlen(buffer));
+
+                                
+                                start_buf = aux - buffer + strlen(key) - start_key;
+                                printf("start_buf: %d_____\n",  start_buf);
+                                printf("start_keuy: %d_____\n",  start_key);
+                        printf("RES: %s\n", buffer);
+                                */
+                        }
                         replace_word(buffer, result, key, value, size_counter);
                         memcpy(buffer, result, LINE_SIZE);
                 }
+                start_buf += strlen(key);
         }
 
         /*
@@ -280,9 +285,13 @@ int read_file(h_table *table, char *input_filename, char *output_filename)
                         } else {
                                 /*
                                 print_vector(define_words);
-                                print_vector(code_words);
                                 printf("%s", computed_string);
+                                
+                                print_vector(code_words);
+                                printf("Buffer: %s\n", buffer);
                                 */
+
+
                                 memset(computed_string, 0, LINE_SIZE);
                                 memcpy(computed_string, 
                                         compute_code(table, code_words, buffer), 

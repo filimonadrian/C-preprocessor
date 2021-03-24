@@ -158,11 +158,12 @@ int main(int argc, char **argv)
         if (ret > 0) {
                 goto free_memory;
         }
-
+        
+        
 
         /*
-        print_table(table);
          *
+        print_table(table);
 
         print_vector(words);
          */
