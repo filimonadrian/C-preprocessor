@@ -174,15 +174,70 @@ char *compute_code(h_table *table, vector *words, char buffer[])
                 }
                 start_buf += strlen(key);
         }
-
-        /*
-        printf("%s", buffer);
-        */
         return buffer;
+}
+
+void extract_path(char *filename, char *path)
+{
+        size_t filename_size = strlen(filename);
+        int i = 0;
+
+        for (i = filename_size - 1; i >= 0; i--) {
+                if (filename[i] == '/' || filename[i] == '/') {
+                        break;
+                }
+        }
+
+        memcpy(path, filename, i + 1);
 
 }
 
-int read_file(h_table *table, char *input_filename, char *output_filename)
+/* returns true if file exits */
+int file_exists(char *include_file)
+{
+        FILE *fp;
+        if ((fp = fopen(include_file, "r"))) {
+                fclose(fp);
+                return 1;
+        }
+        return 0;
+}
+
+int compute_include(vector *paths, char *input_filename, vector *words)
+{
+        char input_file_path[LINE_SIZE];
+        char filename_from_include[LINE_SIZE];
+        char include_path[LINE_SIZE];
+
+        memset(input_file_path, 0, LINE_SIZE);
+        memset(filename_from_include, 0, LINE_SIZE);
+        memset(include_path, 0, LINE_SIZE);
+
+        if (strcmp(input_filename, "stdin") == 0) {
+                return 0;
+        }
+        
+        /* extract path from input file */
+        extract_path(input_filename, input_file_path);
+        if (words->size > 0) {
+                char *file = get_element(words, 1);
+                memcpy(filename_from_include, file + 1, strlen(file) - 2);
+        }
+
+        memcpy(include_path, input_file_path, strlen(input_file_path));
+        memcpy(include_path + strlen(input_file_path),
+                filename_from_include,
+                strlen(filename_from_include));
+
+        
+        if (file_exists(include_path) == 0) {
+                return 1;
+        }
+
+        return 0;
+}
+
+int read_file(h_table *table, vector *paths, char *input_filename, char *output_filename)
 {
         FILE *input_fp, *output_fp;
         char buffer[LINE_SIZE];
@@ -190,7 +245,7 @@ int read_file(h_table *table, char *input_filename, char *output_filename)
         char buffer_copy2[LINE_SIZE];
         char computed_string[LINE_SIZE];
         char key[LINE_SIZE];
-        int condition = 1;
+        int condition = 1, ret = 0;
 
         if (strcmp(input_filename, "stdin") == 0) {
                 input_fp = stdin;
@@ -271,9 +326,11 @@ int read_file(h_table *table, char *input_filename, char *output_filename)
 
                 } else if (strncmp(get_element(define_words, 0), "#endif", 6) == 0) {
                         condition = 1;
-                } else if (strncmp(get_element(define_words, 0), "#include", 6) == 0) {
-                        print_vector(define_words);
-                        
+                } else if (strncmp(get_element(define_words, 0), "#include", 8) == 0) {
+                        ret = compute_include(paths, input_filename, define_words);
+                        if(ret)
+                                goto free_vectors;
+
                 } else {
                         /*
                         print_vector(define_words);
@@ -297,12 +354,15 @@ int read_file(h_table *table, char *input_filename, char *output_filename)
                 free_vectors:
                         delete_vector(define_words);
                         delete_vector(code_words);
+                        if (ret)
+                                goto close_files;
+
         }
 
-
-        fclose(input_fp);
-        fclose(output_fp);
-        return 0;
+        close_files:
+                fclose(input_fp);
+                fclose(output_fp);
+        return ret;
 }
 
 void read_line(FILE *file, char *buffer)

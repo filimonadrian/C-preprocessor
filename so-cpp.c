@@ -154,7 +154,7 @@ int main(int argc, char **argv)
         if (output_filename == NULL)
                 parse_filename(&output_filename, "stdout");
 
-        ret = read_file(table, input_filename, output_filename);
+        ret = read_file(table, paths, input_filename, output_filename);
         if (ret > 0) {
                 goto free_memory;
         }
