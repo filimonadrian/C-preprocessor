@@ -149,7 +149,8 @@ int main(int argc, char **argv)
                 goto free_memory;
 
 
-        ret = read_arguments(table, paths, &output_filename, &input_filename, argc, argv);
+        ret = read_arguments(table, paths, &output_filename,
+                                &input_filename, argc, argv);
         if (ret > 0)
                 goto free_memory;
 

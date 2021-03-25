@@ -10,6 +10,6 @@ typedef struct vector {
 
 int create_vector(vector **v, int capacity);
 int insert_string(vector *v, char *str);
+char *get_element(vector *v, int index);
 void delete_vector(vector *v);
 void print_vector(vector *v);
-char *get_element(vector *v, int index);

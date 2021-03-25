@@ -38,7 +38,7 @@ char *get_element(vector *v, int index)
         if (v != NULL && v->arr != NULL && v->arr[index] != NULL)
                 return v->arr[index];
 
-        return NULL;       
+        return NULL;
 }
 
 void delete_vector(vector *v)

@@ -1,15 +1,13 @@
 #include "hashtable.h"
 
-/* djb2 by Dan Bernstein */
+/* djb2 */
 unsigned int hash(char *key)
 {
-        unsigned long hash = 5381;
+        unsigned long hash = 5303;
         int c;
 
-        while ((c = *key++)) {
-                /* hash * 33 + c */
+        while ((c = *key++))
                 hash = ((hash << 5) + hash) + c;
-        }
 
         return hash % TABLE_SIZE;
 }

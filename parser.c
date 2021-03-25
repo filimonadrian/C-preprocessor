@@ -5,12 +5,11 @@ void split_line(vector *words, char *buffer)
         int ret = 0;
         char *token = strtok(buffer, "\n\t []{}<>=-*+/\%!&|^.,:;().");
 
-        while (token != NULL) { 
+        while (token != NULL) {
                 if (strcmp(token, "\n") != 0)
                         ret = insert_string(words, token);
 
                 token = strtok(NULL, "\n\t []{}<>=-*+/\%!&|^.,:;().");
-
         }
 }
 
@@ -103,7 +102,8 @@ void compute_ifdef(h_table *table, vector *words, int *condition)
         }
         *condition = 0;
 }
-void replace_word(char *str, char *result, char *old_word, char *new_word, int start_index)
+void replace_word(char *str, char *result, char *old_word,
+                        char *new_word, int start_index)
 {
         int new_word_size = strlen(new_word);
         int old_word_size = strlen(old_word);
@@ -134,7 +134,7 @@ void compute_code(h_table *table, vector *words, char *buffer)
 
                 if (strncmp(key, "//", 2) == 0)
                         break;
-                
+
                 /* if it's the first occurence of " */
                 if (key[0] == '"') {
                         start_key++;
@@ -146,8 +146,10 @@ void compute_code(h_table *table, vector *words, char *buffer)
                         }
                         /* escape all words between " */
                         while (i < words->size) {
-                                if (strchr(get_element(words, i) + start_key, '"') != NULL)
+                                if (strchr(get_element(words, i) +
+                                        start_key, '"') != NULL)
                                         break;
+
                                 start_buf += strlen(key);
                                 i++;
                         }
@@ -200,7 +202,8 @@ void create_include_path(char *dir_path, char *include_filename, char *include_p
 
 }
 
-int read_write_headers(h_table *table, char *include_path, FILE *output_fp, int *condition)
+int read_write_headers(h_table *table, char *include_path,
+                        FILE *output_fp, int *condition)
 {
         vector *define_words = NULL;
         vector *code_words = NULL;
@@ -233,7 +236,7 @@ int read_write_headers(h_table *table, char *include_path, FILE *output_fp, int 
 
                 split_defines(define_words, buffer_copy1);
                 split_line(code_words, buffer_copy2);
-                
+
                 ret = compute_directives(table, define_words, code_words, NULL,
                                         buffer, include_path, output_fp, condition);
                 if (ret)
@@ -244,14 +247,14 @@ int read_write_headers(h_table *table, char *include_path, FILE *output_fp, int 
         return ret;
 }
 
-int compute_include(h_table *table, vector *paths, vector *words, char *input_filename, FILE *output_fp, int *condition)
+int compute_include(h_table *table, vector *paths, vector *words,
+                        char *input_filename, FILE *output_fp, int *condition)
 {
         char input_file_path[LINE_SIZE];
         char filename_from_include[LINE_SIZE];
         char include_path[LINE_SIZE];
         int i = 0;
         int ret = 0;
-        
 
         memset(input_file_path, 0, LINE_SIZE);
         memset(filename_from_include, 0, LINE_SIZE);
@@ -259,7 +262,7 @@ int compute_include(h_table *table, vector *paths, vector *words, char *input_fi
 
         if (strcmp(input_filename, "stdin") == 0)
                 return 0;
-        
+
         /* extract path from input file */
         extract_path(input_filename, input_file_path);
         if (words->size > 0) {
@@ -284,13 +287,15 @@ int compute_include(h_table *table, vector *paths, vector *words, char *input_fi
         /* find file in dirs received as parameter */
         for (i = 0; i < paths->size; i++) {
                 memset(include_path, 0, LINE_SIZE);
-                create_include_path(get_element(paths, i), filename_from_include, include_path);
+                create_include_path(get_element(paths, i),
+                                        filename_from_include, include_path);
                 if (file_exists(include_path) == 1) {
-                        ret = read_write_headers(table, include_path, output_fp, condition);
+                        ret = read_write_headers(table, include_path,
+                                                output_fp, condition);
                         if (ret)
                                 return ret;
                 }
-        }      
+        }
 
         return 0;
 }
@@ -344,7 +349,8 @@ int compute_directives(h_table *table, vector *define_words,
                 *condition = 1;
 
         } else if (strncmp(get_element(define_words, 0), "#include", 8) == 0) {
-                ret = compute_include(table, paths, define_words, input_filename, output_fp, condition);
+                ret = compute_include(table, paths, define_words,
+                                        input_filename, output_fp, condition);
                 if(ret)
                         goto free_vectors;
 
@@ -361,7 +367,8 @@ free_vectors:
 }
 
 
-int process_files(h_table *table, vector *paths, char *input_filename, char *output_filename)
+int process_files(h_table *table, vector *paths,
+                        char *input_filename, char *output_filename)
 {
         FILE *input_fp, *output_fp;
         vector *code_words = NULL;
@@ -408,8 +415,9 @@ int process_files(h_table *table, vector *paths, char *input_filename, char *out
                 split_defines(define_words, buffer_copy1);
                 split_line(code_words, buffer_copy2);
 
-                ret = compute_directives(table, define_words, code_words, paths,
-                                        buffer, input_filename, output_fp, &condition);
+                ret = compute_directives(table, define_words, code_words,
+                                        paths, buffer, input_filename,
+                                        output_fp, &condition);
                 if (ret)
                         break;
         }
