@@ -126,7 +126,9 @@ int main(int argc, char **argv)
 
         vector *paths = create_vector(8);
         vector *words = create_vector(8);
-        h_table *table = create_table();
+        h_table *table = NULL;
+        
+        create_table(&table);
 
 
         ret = read_arguments(table, paths, &output_filename, &input_filename, argc, argv);

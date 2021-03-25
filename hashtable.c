@@ -14,20 +14,23 @@ unsigned int hash(char *key)
         return hash % TABLE_SIZE;
 }
 
-h_table *create_table(void)
+int create_table(h_table **table)
 {
         int i = 0;
         /* create table */
-        h_table *table = malloc(sizeof(struct h_table));
-
+        *table = malloc(sizeof(struct h_table));
+        if (table == NULL)
+                return 12;
         /* create all entries for the table */
-        table->entries = malloc(TABLE_SIZE * sizeof(struct entry_t *));
+        (*table)->entries = malloc(TABLE_SIZE * sizeof(struct entry_t *));
+        if ((*table)->entries == NULL)
+                return 12;
 
         /* set all entries to NULL */
         for (i = 0; i < TABLE_SIZE; i++)
-                table->entries[i] = NULL;
+                (*table)->entries[i] = NULL;
 
-        return table;
+        return 0;
 }
 
 entry_t *create_pair(char *key, char *value)
