@@ -6,13 +6,13 @@
 #include <string.h>
 
 typedef struct entry_t {
-        char *key;
-        char *value;
-        struct entry_t *next;
+	char *key;
+	char *value;
+	struct entry_t *next;
 } entry_t;
 
 typedef struct h_table {
-        entry_t **entries;
+	entry_t **entries;
 } h_table;
 
 unsigned int hash(char *key);

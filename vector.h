@@ -3,9 +3,9 @@
 #include <stdlib.h>
 
 typedef struct vector {
-        char **arr;
-        int size;
-        int capacity;
+	char **arr;
+	int size;
+	int capacity;
 } vector;
 
 int create_vector(vector **v, int capacity);
