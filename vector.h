@@ -8,8 +8,8 @@ typedef struct vector {
         int capacity;
 } vector;
 
-vector *create_vector(int capacity);
-void insert_string(vector *v, char *str);
-void delete_vector(vector *v);        
+int create_vector(vector **v, int capacity);
+int insert_string(vector *v, char *str);
+void delete_vector(vector *v);
 void print_vector(vector *v);
 char *get_element(vector *v, int index);

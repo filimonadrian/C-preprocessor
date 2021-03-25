@@ -1,30 +1,27 @@
 #include "parser.h"
 
-void split_line(vector *words, char buffer[])
+void split_line(vector *words, char *buffer)
 {
-        char* token = strtok(buffer, "\n\t []{}<>=-*+/\%!&|^.,:;()."); 
-        while (token != NULL) { 
-                /*
-                printf("_%s_\n", token);
-                */
-                if (strcmp(token, "\n") != 0)
-                        insert_string(words, token);
+        int ret = 0;
+        char *token = strtok(buffer, "\n\t []{}<>=-*+/\%!&|^.,:;().");
 
-                token = strtok(NULL, "\n\t []{}<>=-*+/\%!&|^.,:;()."); 
+        while (token != NULL) { 
+                if (strcmp(token, "\n") != 0)
+                        ret = insert_string(words, token);
+
+                token = strtok(NULL, "\n\t []{}<>=-*+/\%!&|^.,:;().");
 
         }
 }
 
-void split_defines(vector *words, char buffer[])
+void split_defines(vector *words, char *buffer)
 {
-        char* token = strtok(buffer, "\n\t "); 
+        int ret = 0;
+        char *token = strtok(buffer, "\n\t ");
 
-        while (token != NULL) { 
-                /*
-                printf("%s\n", token);
-                */
-                insert_string(words, token);
-                token = strtok(NULL, "\n\t "); 
+        while (token != NULL) {
+                ret = insert_string(words, token);
+                token = strtok(NULL, "\n\t ");
         }
 }
 
@@ -33,15 +30,15 @@ void compute_defines(h_table *table, vector *words, char *key)
         char aux[LINE_SIZE];
         int aux_size = 0;
         int i = 0;
+        int ret = 0;
 
         memset(aux, 0, LINE_SIZE);
 
-        if (words->size < 3) {
+        if (words->size < 3)
                 return;
-        }
 
         if (words->size == 3) {
-                insert_pair(table, words->arr[1], words->arr[2]);
+                ret = insert_pair(table, words->arr[1], words->arr[2]);
                 memcpy(key, get_element(words, 1), strlen(get_element(words, 1)));
                 return;
         }
@@ -64,25 +61,22 @@ void compute_defines(h_table *table, vector *words, char *key)
                 } else {
                         memcpy(aux + aux_size, value, strlen(value));
                         aux_size += strlen(value);
-                        /*
-                        printf("Valoarea este:  %s\n", value);
-                        */
                 }
+
                 if (i < words->size - 1) {
                         aux[aux_size] = ' ';
                         aux_size++;
                 }
         }
 
-        insert_pair(table, get_element(words, 1), aux);
+        ret = insert_pair(table, get_element(words, 1), aux);
         memcpy(key, get_element(words, 1), strlen(get_element(words, 1)));
 }
 
 void compute_undef(h_table *table, vector *words)
 {
-        if (words->size == 2) {
+        if (words->size == 2)
                 delete_entry(table, get_element(words, 1));
-        }
 }
 
 void compute_if(h_table *table, vector *words, int *condition)
@@ -90,12 +84,10 @@ void compute_if(h_table *table, vector *words, int *condition)
         if (words->size == 2) {
                 char *aux = get_value(table, get_element(words, 1));
 
-                if (aux != NULL) {
+                if (aux != NULL)
                         *condition = atoi(aux);
-
-                } else if (aux == NULL) {
+                else if (aux == NULL)
                         *condition = atoi(get_element(words, 1));
-                }
         }
 }
 
@@ -103,6 +95,7 @@ void compute_ifdef(h_table *table, vector *words, int *condition)
 {
         if (words->size == 2) {
                 char *value = get_value(table, get_element(words, 1));
+
                 if (value != NULL) {
                         *condition = 1;
                         return;
@@ -131,16 +124,16 @@ void compute_code(h_table *table, vector *words, char *buffer)
         int start_key = 0;
         int start_buf = 0;
         char result[LINE_SIZE];
+
         memset(result, 0, LINE_SIZE);
 
         for (i = 0; i < words->size; i++) {
                 char *key = get_element(words, i);
-                start_key = 0;
-                
 
-                if (strncmp(key, "//", 2) == 0) {
+                start_key = 0;
+
+                if (strncmp(key, "//", 2) == 0)
                         break;
-                }
                 
                 /* if it's the first occurence of " */
                 if (key[0] == '"') {
@@ -153,9 +146,8 @@ void compute_code(h_table *table, vector *words, char *buffer)
                         }
                         /* escape all words between " */
                         while (i < words->size) {
-                                if (strchr(get_element(words, i) + start_key, '"') != NULL) {
+                                if (strchr(get_element(words, i) + start_key, '"') != NULL)
                                         break;
-                                }
                                 start_buf += strlen(key);
                                 i++;
                         }
@@ -164,19 +156,16 @@ void compute_code(h_table *table, vector *words, char *buffer)
                 char *value = get_value(table, key);
 
                 if (value != NULL) {
-                        
-                        char *aux = strstr(buffer + start_buf, key );
-                        if (aux != NULL) {
+                        char *aux = strstr(buffer + start_buf, key);
+
+                        if (aux != NULL)
                                 size_counter = aux - buffer - 1;
-                        }
+
                         replace_word(buffer, result, key, value, size_counter);
                         memcpy(buffer, result, LINE_SIZE);
                 }
                 start_buf += strlen(key);
         }
-        /*
-        return buffer;
-        */
 }
 
 void extract_path(char *filename, char *path)
@@ -184,21 +173,19 @@ void extract_path(char *filename, char *path)
         size_t filename_size = strlen(filename);
         int i = 0;
 
-        for (i = filename_size - 1; i >= 0; i--) {
-                if (filename[i] == '/' || filename[i] == '/') {
+        for (i = filename_size - 1; i >= 0; i--)
+                if (filename[i] == '/' || filename[i] == '/')
                         break;
-                }
-        }
 
         memcpy(path, filename, i + 1);
-
 }
 
 /* returns true if file exits */
 int file_exists(char *include_file)
 {
-        FILE *fp;
-        if ((fp = fopen(include_file, "r"))) {
+        FILE *fp = fopen(include_file, "r");
+
+        if (fp != NULL) {
                 fclose(fp);
                 return 1;
         }
@@ -215,10 +202,12 @@ void create_include_path(char *dir_path, char *include_filename, char *include_p
 
 int read_write_headers(h_table *table, char *include_path, FILE *output_fp, int *condition)
 {
+        vector *define_words = NULL;
+        vector *code_words = NULL;
+        FILE *include_fp = NULL;
         char buffer[LINE_SIZE];
         char buffer_copy1[LINE_SIZE];
         char buffer_copy2[LINE_SIZE];
-        FILE *include_fp = NULL;
         int ret = 0;
 
         include_fp = fopen(include_path, "r");
@@ -229,8 +218,13 @@ int read_write_headers(h_table *table, char *include_path, FILE *output_fp, int 
 
         while (!feof(include_fp)) {
 
-                vector *define_words = create_vector(5);
-                vector *code_words = create_vector(5);
+                ret = create_vector(&define_words, 5);
+                if (ret)
+                        break;
+
+                ret = create_vector(&code_words, 5);
+                if (ret)
+                        break;
 
                 read_line(include_fp, buffer);
 
@@ -247,7 +241,7 @@ int read_write_headers(h_table *table, char *include_path, FILE *output_fp, int 
         }
 
         fclose(include_fp);
-        return 0;
+        return ret;
 }
 
 int compute_include(h_table *table, vector *paths, vector *words, char *input_filename, FILE *output_fp, int *condition)
@@ -263,14 +257,14 @@ int compute_include(h_table *table, vector *paths, vector *words, char *input_fi
         memset(filename_from_include, 0, LINE_SIZE);
         memset(include_path, 0, LINE_SIZE);
 
-        if (strcmp(input_filename, "stdin") == 0) {
+        if (strcmp(input_filename, "stdin") == 0)
                 return 0;
-        }
         
         /* extract path from input file */
         extract_path(input_filename, input_file_path);
         if (words->size > 0) {
                 char *file = get_element(words, 1);
+
                 memcpy(filename_from_include, file + 1, strlen(file) - 2);
         }
 
@@ -279,12 +273,13 @@ int compute_include(h_table *table, vector *paths, vector *words, char *input_fi
                 filename_from_include,
                 strlen(filename_from_include));
 
-        
-        if (file_exists(include_path) == 0 && paths->size == 0) {
+        if (paths == NULL)
                 return 1;
-        } else if (file_exists(include_path) == 1) {
+
+        if (file_exists(include_path) == 0 && paths->size == 0)
+                return 1;
+        else if (file_exists(include_path) == 1)
                 return read_write_headers(table, include_path, output_fp, condition);
-        }
 
         /* find file in dirs received as parameter */
         for (i = 0; i < paths->size; i++) {
@@ -292,9 +287,8 @@ int compute_include(h_table *table, vector *paths, vector *words, char *input_fi
                 create_include_path(get_element(paths, i), filename_from_include, include_path);
                 if (file_exists(include_path) == 1) {
                         ret = read_write_headers(table, include_path, output_fp, condition);
-                        if (ret != 0) {
+                        if (ret)
                                 return ret;
-                        }
                 }
         }      
 
@@ -318,7 +312,7 @@ int compute_directives(h_table *table, vector *define_words,
                 strncmp(get_element(define_words, 0), "#else", 5) != 0) {
                 goto free_vectors;
         }
-        
+
         if (strncmp(get_element(define_words, 0), "#define", 7) == 0) {
                 compute_defines(table, define_words, key);
 
@@ -338,11 +332,11 @@ int compute_directives(h_table *table, vector *define_words,
                 compute_if(table, define_words, condition);
 
         } else if (strncmp(get_element(define_words, 0), "#else", 5) == 0) {
-                if (*condition == 1) {
+                if (*condition == 1)
                         *condition = 0;
-                } else {
+                else
                         *condition = 1;
-                }
+
         } else if (strncmp(get_element(define_words, 0), "#elif", 5) == 0) {
                 compute_if(table, define_words, condition);
 
@@ -359,10 +353,10 @@ int compute_directives(h_table *table, vector *define_words,
                 write_line(output_fp, buffer);
         }
 
-        free_vectors:
-                delete_vector(define_words);
-                delete_vector(code_words);
-                
+free_vectors:
+        delete_vector(define_words);
+        delete_vector(code_words);
+
         return ret;
 }
 
@@ -370,28 +364,27 @@ int compute_directives(h_table *table, vector *define_words,
 int process_files(h_table *table, vector *paths, char *input_filename, char *output_filename)
 {
         FILE *input_fp, *output_fp;
+        vector *code_words = NULL;
+        vector *define_words = NULL;
         char buffer[LINE_SIZE];
         char buffer_copy1[LINE_SIZE];
         char buffer_copy2[LINE_SIZE];
-        
         int condition = 1, ret = 0;
 
-        if (strcmp(input_filename, "stdin") == 0) {
+        if (strcmp(input_filename, "stdin") == 0)
                 input_fp = stdin;
-        } else {
+        else
                 input_fp = fopen(input_filename, "r");
-        }
 
         if (input_fp == NULL) {
                 fprintf(stderr, "Cannot open %s file!\n", input_filename);
                 return 1;
         }
 
-        if (strcmp(output_filename, "stdout") == 0) {
+        if (strcmp(output_filename, "stdout") == 0)
                 output_fp = stdout;
-        } else {
+        else
                 output_fp = fopen(output_filename, "w");
-        }
 
         if (output_fp == NULL) {
                 fprintf(stderr, "Cannot open %s file!\n", output_filename);
@@ -399,9 +392,13 @@ int process_files(h_table *table, vector *paths, char *input_filename, char *out
         }
 
         while (!feof(input_fp)) {
+                ret = create_vector(&define_words, 5);
+                if (ret)
+                        break;
 
-                vector *define_words = create_vector(5);
-                vector *code_words = create_vector(5);
+                ret = create_vector(&code_words, 5);
+                if (ret)
+                        break;
 
                 read_line(input_fp, buffer);
 
@@ -436,7 +433,6 @@ void write_line(FILE *file, char *buffer)
         if (file == NULL)
                 return;
 
-        if (strncmp(buffer, "\n", 1)) {
+        if (strncmp(buffer, "\n", 1))
                 fwrite(buffer, strlen(buffer), 1, file);
-        }
 }

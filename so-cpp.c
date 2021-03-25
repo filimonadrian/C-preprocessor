@@ -53,9 +53,9 @@ int parse_filename(char **filename, char *str)
 {
         if (*filename == NULL) {
                 *filename = malloc((strlen(str) + 1) * sizeof(char));
-                if (filename == NULL) {
-                        return 12;
-                }
+                if (filename == NULL)
+                        exit(12);
+
                 memset(*filename, 0, strlen(str) + 1);
                 memcpy(*filename, str, strlen(str));
         } else {
@@ -95,10 +95,12 @@ int read_arguments(h_table *table, vector *paths,
 
                 } else if (strncmp(argv[i], "-I", 2) == 0) {
                         parse_path(paths, argv[i] + 2);
-                
+
                 } else if (strcmp(argv[i], "-o") == 0) {
                         i++;
-                        parse_filename(output_file, argv[i]);
+                        ret = parse_filename(output_file, argv[i]);
+                        if (ret)
+                                return ret;
 
                 } else if (strncmp(argv[i], "-o", 2) == 0) {
                         ret = parse_filename(output_file, argv[i] + 2);
@@ -129,37 +131,50 @@ int main(int argc, char **argv)
 {
         char *output_filename = NULL;
         char *input_filename = NULL;
+        vector *paths = NULL;
+        vector *words = NULL;
+        h_table *table = NULL;
         int ret = 0;
 
-        vector *paths = create_vector(8);
-        vector *words = create_vector(8);
-        h_table *table = NULL;
-        
-        create_table(&table);
+        ret = create_vector(&paths, 8);
+        if (ret)
+                goto free_memory;
+
+        ret = create_vector(&words, 8);
+        if (ret)
+                goto free_memory;
+
+        ret = create_table(&table);
+        if (ret)
+                goto free_memory;
 
 
         ret = read_arguments(table, paths, &output_filename, &input_filename, argc, argv);
-        if (ret > 0) {
+        if (ret > 0)
                 goto free_memory;
+
+        if (input_filename == NULL) {
+                ret = parse_filename(&input_filename, "stdin");
+                if (ret)
+                        goto free_memory;
         }
 
-        if (input_filename == NULL)
-                parse_filename(&input_filename, "stdin");
-
-        if (output_filename == NULL)
-                parse_filename(&output_filename, "stdout");
+        if (output_filename == NULL) {
+                ret = parse_filename(&output_filename, "stdout");
+                if (ret)
+                        goto free_memory;
+        }
 
         ret = process_files(table, paths, input_filename, output_filename);
-        if (ret > 0) {
+        if (ret > 0)
                 goto free_memory;
-        }
 
 free_memory:
         free(input_filename);
         free(output_filename);
         delete_vector(paths);
         delete_vector(words);
-        delete_table(table); 
+        delete_table(table);
 
 
         return ret;

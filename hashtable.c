@@ -19,12 +19,12 @@ int create_table(h_table **table)
         int i = 0;
         /* create table */
         *table = malloc(sizeof(struct h_table));
-        if (table == NULL)
-                return 12;
+        if (*table == NULL)
+                exit(12);
         /* create all entries for the table */
         (*table)->entries = malloc(TABLE_SIZE * sizeof(struct entry_t *));
         if ((*table)->entries == NULL)
-                return 12;
+                exit(12);
 
         /* set all entries to NULL */
         for (i = 0; i < TABLE_SIZE; i++)
@@ -37,17 +37,16 @@ int create_pair(char *key, char *value, entry_t **entry)
 {
         /* create an entry */
         *entry = malloc(sizeof(entry_t));
-
         if ((*entry) == NULL)
-                return 12;
+                exit(12);
 
         (*entry)->key = malloc(strlen(key) + 1);
         if ((*entry)->key == NULL)
-                return 12;
+                exit(12);
 
         (*entry)->value = malloc(strlen(value) + 1);
         if ((*entry)->value == NULL)
-                return 12;
+                exit(12);
 
         memset((*entry)->key, 0, strlen(key) + 1);
         memset((*entry)->value, 0, strlen(value) + 1);
@@ -80,9 +79,8 @@ int insert_pair(h_table *table, char *key, char *value)
 
         /* if the entry exists in the list of a slot don't update the value */
         while (trailer != NULL) {
-                if (strcmp(trailer->key, key) == 0) {
+                if (strcmp(trailer->key, key) == 0)
                         return 0;
-                }
 
                 prev_neigh = trailer;
                 trailer = prev_neigh->next;
@@ -101,9 +99,8 @@ void insert_entry(h_table *table, entry_t *entry)
         entry_t *prev_neigh = NULL;
         entry_t *trailer = NULL;
 
-        if (entry == NULL) {
+        if (entry == NULL)
                 return;
-        }
 
         hashcode = hash(entry->key);
 
@@ -116,9 +113,9 @@ void insert_entry(h_table *table, entry_t *entry)
 
         /* update the value if the entry exists in the list of a slot*/
         while (trailer != NULL) {
-                if (strcmp(trailer->key, entry->key) == 0) {
+                if (strcmp(trailer->key, entry->key) == 0)
                         return;
-                }
+
                 prev_neigh = trailer;
                 trailer = prev_neigh->next;
         }
