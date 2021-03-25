@@ -1,13 +1,13 @@
 #include "so-cpp.h"
 
-entry_t *parse_symbol_mapping(char *str)
+int parse_symbol_mapping(char *str, entry_t **entry)
 {
         size_t key_mapping = 0;
         size_t value_size = 0;
         size_t str_size = strlen(str);
         size_t i = 0;
         char key[LINE_SIZE], value[LINE_SIZE];
-        entry_t *entry = NULL;
+        int ret = 0;
 
         memset(key, 0, LINE_SIZE);
         memset(value, 0, LINE_SIZE);
@@ -24,8 +24,9 @@ entry_t *parse_symbol_mapping(char *str)
                         value_size = str_size - i - 1;
 
                         memcpy(value, str + i + 1, value_size);
-                        entry = create_pair(key, value);
-
+                        ret = create_pair(key, value, entry);
+                        if (ret)
+                                return ret;
                         break;
                 }
         }
@@ -34,10 +35,12 @@ entry_t *parse_symbol_mapping(char *str)
         if (key_mapping == 0) {
                 /* copy in key entire received string */
                 memcpy(key, str, str_size);
-                entry = create_pair(key, "");
+                ret = create_pair(key, "", entry);
+                if (ret)
+                        return ret;
         }
 
-        return entry;
+        return 0;
 }
 
 
@@ -75,11 +78,15 @@ int read_arguments(h_table *table, vector *paths,
                 /* if it's case -D */
                 if (strcmp(argv[i], "-D") == 0) {
                         i++;
-                        entry = parse_symbol_mapping(argv[i]);
+                        ret = parse_symbol_mapping(argv[i], &entry);
+                        if (ret)
+                                return ret;
                         insert_entry(table, entry);
 
                 } else if (strncmp(argv[i], "-D", 2) == 0) {
-                        entry = parse_symbol_mapping(argv[i] + 2);
+                        ret = parse_symbol_mapping(argv[i] + 2, &entry);
+                        if (ret)
+                                return ret;
                         insert_entry(table, entry);
 
                 } else if (strcmp(argv[i], "-I") == 0) {

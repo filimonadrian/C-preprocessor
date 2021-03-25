@@ -17,9 +17,9 @@ typedef struct h_table {
 } h_table;
 
 unsigned int hash(char *key);
-h_table *create_table(void);
-entry_t *create_pair(char *key, char *value);
-void insert_pair(h_table *table, char *key, char *value);
+int create_table(h_table **table);
+int create_pair(char *key, char *value, entry_t **entry);
+int insert_pair(h_table *table, char *key, char *value);
 void insert_entry(h_table *table, entry_t *entry);
 char *get_value(h_table *table, char *key);
 void delete_entry(h_table *table, char *key);

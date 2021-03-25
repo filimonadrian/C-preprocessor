@@ -33,61 +33,66 @@ int create_table(h_table **table)
         return 0;
 }
 
-entry_t *create_pair(char *key, char *value)
+int create_pair(char *key, char *value, entry_t **entry)
 {
         /* create an entry */
-        entry_t *entry = malloc(sizeof(entry_t));
+        *entry = malloc(sizeof(entry_t));
 
-        entry->key = malloc(strlen(key) + 1);
-        entry->value = malloc(strlen(value) + 1);
-        memset(entry->key, 0, strlen(key) + 1);
-        memset(entry->value, 0, strlen(value) + 1);
+        if ((*entry) == NULL)
+                return 12;
 
-        memcpy(entry->key, key, strlen(key));
-        memcpy(entry->value, value, strlen(value));
-        /*
-         *strcpy(entry->key, key);
-         *strcpy(entry->value, value);
-         */
-        entry->next = NULL;
+        (*entry)->key = malloc(strlen(key) + 1);
+        if ((*entry)->key == NULL)
+                return 12;
 
-        return entry;
+        (*entry)->value = malloc(strlen(value) + 1);
+        if ((*entry)->value == NULL)
+                return 12;
+
+        memset((*entry)->key, 0, strlen(key) + 1);
+        memset((*entry)->value, 0, strlen(value) + 1);
+
+        memcpy((*entry)->key, key, strlen(key));
+        memcpy((*entry)->value, value, strlen(value));
+        (*entry)->next = NULL;
+
+        return 0;
 }
 
-/* insert a new pair or update the value for an existent key */
-void insert_pair(h_table *table, char *key, char *value)
+/* insert a new pair */
+int insert_pair(h_table *table, char *key, char *value)
 {
         unsigned int hashcode = 0;
         entry_t *prev_neigh = NULL;
         entry_t *trailer = NULL;
+        int ret = 0;
 
         hashcode = hash(key);
 
         /* insert entry if does not already exist a slot with its hashcode */
         trailer = table->entries[hashcode];
         if (trailer == NULL) {
-                table->entries[hashcode] = create_pair(key, value);
-                return;
+                ret = create_pair(key, value, &table->entries[hashcode]);
+                if (ret)
+                        return 12;
+                return 0;
         }
 
-        /* update the value if the entry exists in the list of a slot*/
+        /* if the entry exists in the list of a slot don't update the value */
         while (trailer != NULL) {
                 if (strcmp(trailer->key, key) == 0) {
-                        /*
-                        free(trailer->value);
-                        trailer->value = malloc(strlen(value) + 1);
-                        memset(trailer->value, 0, strlen(value) + 1);
-                        memcpy(trailer->value, value, strlen(value));
-                        */
-                        return;
+                        return 0;
                 }
 
                 prev_neigh = trailer;
                 trailer = prev_neigh->next;
         }
 
-        prev_neigh->next = create_pair(key, value);
+        ret = create_pair(key, value, &prev_neigh->next);
+        if (ret)
+                return 12;
 
+        return 0;
 }
 
 void insert_entry(h_table *table, entry_t *entry)
@@ -112,13 +117,6 @@ void insert_entry(h_table *table, entry_t *entry)
         /* update the value if the entry exists in the list of a slot*/
         while (trailer != NULL) {
                 if (strcmp(trailer->key, entry->key) == 0) {
-                        /*
-                        free(trailer->value);
-                        free(trailer->key);
-                        entry->next = trailer->next;
-                        trailer = entry;
-                        prev_neigh->next = entry;
-                        */
                         return;
                 }
                 prev_neigh = trailer;
