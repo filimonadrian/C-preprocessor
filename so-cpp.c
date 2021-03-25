@@ -6,7 +6,11 @@ entry_t *parse_symbol_mapping(char *str)
         size_t value_size = 0;
         size_t str_size = strlen(str);
         size_t i = 0;
-        entry_t *entry = malloc(sizeof(entry_t));
+        char key[LINE_SIZE], value[LINE_SIZE];
+        entry_t *entry = NULL;
+
+        memset(key, 0, LINE_SIZE);
+        memset(value, 0, LINE_SIZE);
 
         for (i = 0; i < str_size; i++) {
                 if (str[i] == '=') {
@@ -14,20 +18,14 @@ entry_t *parse_symbol_mapping(char *str)
                         key_mapping = 1;
 
                         /* copy key in entry and append '\0' */
-                        entry->key = malloc((i + 1) * sizeof(char));
-                        memset(entry->key, 0, i + 1);
-                        memcpy(entry->key, str, i);
-
-                        /* entry->key[i] = '\0';
-                         *strncpy(entry->key, str, i);
-                         */
+                        memcpy(key, str, i);
 
                         /* copy value in entry and append '\0' */
                         value_size = str_size - i - 1;
-                        entry->value = malloc((value_size + 1) * sizeof(char));
-                        memset(entry->value, 0, value_size + 1);
-                        memcpy(entry->value, str + i + 1, value_size);
-                        /* entry->value[value_size - 1] = '\0'; */
+
+                        memcpy(value, str + i + 1, value_size);
+                        entry = create_pair(key, value);
+
                         break;
                 }
         }
@@ -35,16 +33,8 @@ entry_t *parse_symbol_mapping(char *str)
         /* if the string does not contain '=' means the value is empty */
         if (key_mapping == 0) {
                 /* copy in key entire received string */
-                entry->key = malloc((str_size + 1) * sizeof(char));
-                /*
-                 *strcpy(entry->key, str);
-                 */
-                memcpy(entry->key, str, str_size);
-                entry->key[str_size] = '\0';
-
-                /* and make value an empty char array */
-                entry->value = malloc(sizeof(char));
-                entry->value[0] = '\0';
+                memcpy(key, str, str_size);
+                entry = create_pair(key, "");
         }
 
         return entry;
@@ -56,47 +46,42 @@ void parse_path(vector *paths, char *str)
         insert_string(paths, str);
 }
 
-void parse_filename(char **filename, char *str)
+int parse_filename(char **filename, char *str)
 {
         if (*filename == NULL) {
                 *filename = malloc((strlen(str) + 1) * sizeof(char));
                 if (filename == NULL) {
-                        return;
+                        return 12;
                 }
                 memset(*filename, 0, strlen(str) + 1);
                 memcpy(*filename, str, strlen(str));
         } else {
                 fprintf(stderr, "Multiple definitions of file!\n");
         }
+
+        return 0;
 }
 
 int read_arguments(h_table *table, vector *paths,
                     char **output_file, char **input_file,
                     int argc, char **argv)
 {
-
         int i = 0;
         int counter = 0;
-        /*
-        entry_t *entry = malloc(sizeof(entry_t));
-        */
+        int ret = 0;
         entry_t *entry = NULL;
 
         while (i < argc) {
-                /* printf("%s\n", argv[i]); */
-
                 /* if it's case -D */
                 if (strcmp(argv[i], "-D") == 0) {
                         i++;
                         entry = parse_symbol_mapping(argv[i]);
                         insert_entry(table, entry);
-                        /* printf("%s\n", argv[i]); */
 
                 } else if (strncmp(argv[i], "-D", 2) == 0) {
                         entry = parse_symbol_mapping(argv[i] + 2);
                         insert_entry(table, entry);
 
-                        /* printf("%s\n", argv[i] + 2); */
                 } else if (strcmp(argv[i], "-I") == 0) {
                         i++;
                         parse_path(paths, argv[i]);
@@ -109,13 +94,18 @@ int read_arguments(h_table *table, vector *paths,
                         parse_filename(output_file, argv[i]);
 
                 } else if (strncmp(argv[i], "-o", 2) == 0) {
-                        parse_filename(output_file, argv[i] + 2);
-
+                        ret = parse_filename(output_file, argv[i] + 2);
+                        if (ret)
+                                return ret;
                 } else if (i > 0) {
                         if (counter == 0) {
-                                parse_filename(input_file, argv[i]);
+                                ret = parse_filename(input_file, argv[i]);
+                                if (ret)
+                                        return ret;
                         } else if (counter == 1) {
-                                parse_filename(output_file, argv[i]);
+                                ret = parse_filename(output_file, argv[i]);
+                                if (ret)
+                                        return ret;
                         } else {
                                 return 1;
                         }
@@ -123,12 +113,8 @@ int read_arguments(h_table *table, vector *paths,
                 }
 
                 i++;
-
-                /*
-                 *print_string_decimal(entry->value);
-                 *print_string_decimal(entry->key);
-                 */
         }
+
         return 0;
 }
 

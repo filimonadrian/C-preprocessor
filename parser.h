@@ -20,3 +20,4 @@ int compute_directives(h_table *table, vector *define_words,
                         vector *code_words, vector *paths,
                         char *buffer, char *input_filename,
                         FILE *output_fp, int *condition);
+
