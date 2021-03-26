@@ -127,7 +127,7 @@ test_cpp_stdout()
 test_bad_params()
 {
 	init_test
-	$EXEC_NAME $params 2> /dev/null
+	$EXEC_NAME $params #2> /dev/null
 	basic_test test $? -ne 0
 	cleanup_test
 }
@@ -135,7 +135,7 @@ test_bad_params()
 run_until_success()
 {
 	REF_CODE=12 # ENOMEM
-	NR_RUNS=1000 # How many times to run
+	NR_RUNS=10 # How many times to run
 
 	for ((i = 0; i < $NR_RUNS; i++)); do
 		init_test
