@@ -1,6 +1,6 @@
 #include "hashtable.h"
 
-/* djb2 */
+/* djb2 modified */
 unsigned int hash(char *key)
 {
 	unsigned long hash = 5303;
@@ -226,7 +226,7 @@ void print_table(h_table *table)
 		printf("slot[%d]: ", i);
 
 		while (entry != NULL) {
-			printf("%s = _%s_ ", entry->key, entry->value);
+			printf("%s = %s ", entry->key, entry->value);
 			entry = entry->next;
 		}
 

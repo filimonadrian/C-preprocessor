@@ -23,7 +23,7 @@ int parse_symbol_mapping(char *str, entry_t **entry)
 			/* copy value */
 			value_size = str_size - i - 1;
 			memcpy(value, str + i + 1, value_size);
-                        /* create an entry with this pair<key, value> */
+			/* create an entry with this pair<key, value> */
 			ret = create_pair(key, value, entry);
 			if (ret)
 				return ret;
@@ -54,8 +54,7 @@ int parse_filename(char **filename, char *str)
 	if (*filename == NULL) {
 		*filename = malloc((strlen(str) + 1) * sizeof(char));
 		if (*filename == NULL)
-			/* exit(12);*/
-                        return 12;
+			exit(12);
 
 		memset(*filename, 0, strlen(str) + 1);
 		memcpy(*filename, str, strlen(str));
@@ -107,6 +106,9 @@ int read_arguments(h_table *table, vector *paths,
 			if (ret)
 				return ret;
 		} else if (i > 0) {
+			/*
+			 * check if is input file(the first one) or output
+			 */
 			if (counter == 0) {
 				ret = parse_filename(input_file, argv[i]);
 				if (ret)

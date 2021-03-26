@@ -43,7 +43,10 @@ int compute_defines(h_table *table, vector *words, char *key)
 
 	if (words->size < 3)
 		return 0;
-
+	/*
+	 * if it's a simple define, add pair into table
+	 * ex: #define A 3
+	 */
 	if (words->size == 3) {
 		ret = insert_pair(table, words->arr[1], words->arr[2]);
 		if (ret)
@@ -54,6 +57,7 @@ int compute_defines(h_table *table, vector *words, char *key)
 		return 0;
 	}
 
+	/* the value is an expression, eliminate spaces and insert in table */
 	for (i = 2; i < words->size; i++) {
 		char *word = get_element(words, i);
 		char *value = NULL;
@@ -95,6 +99,7 @@ void compute_undef(h_table *table, vector *words)
 
 void compute_if(h_table *table, vector *words, int *condition)
 {
+	/* if is just de keyword #IF and an expression */
 	if (words->size == 2) {
 		char *aux = get_value(table, get_element(words, 1));
 
@@ -117,6 +122,7 @@ void compute_ifdef(h_table *table, vector *words, int *condition)
 	}
 	*condition = 0;
 }
+/* replace the words starting ar start_index */
 void replace_word(char *str, char *result, char *old_word,
 			char *new_word, int start_index)
 {
@@ -132,6 +138,7 @@ void replace_word(char *str, char *result, char *old_word,
 		strlen(str) - start_index + old_word_size);
 }
 
+/* compute functions and declarations and return number of replaces */
 int compute_code(h_table *table, vector *words, char *buffer)
 {
 	int size_counter = 0;
@@ -150,10 +157,10 @@ int compute_code(h_table *table, vector *words, char *buffer)
 		if (strncmp(key, "//", 2) == 0)
 			break;
 
-		/* if it's the first occurence of " */
+		/* ignore all words between double quotes */
 		if (key[0] == '"') {
 			start_key++;
-			/* if the second " is in the same word pass it */
+			/* if the second '"' is in the same word pass it */
 			if (strchr(key + 1, '"') != NULL) {
 				start_buf += strlen(key);
 				i++;
@@ -172,6 +179,7 @@ int compute_code(h_table *table, vector *words, char *buffer)
 
 		value = get_value(table, key);
 
+		/* if the key is in the map, replace key with value */
 		if (value != NULL) {
 			char *aux = strstr(buffer + start_buf, key);
 
@@ -210,7 +218,7 @@ int file_exists(char *include_file)
 	}
 	return 0;
 }
-
+/* concate a path with a filename */
 void create_include_path(char *dir_path,
 			char *include_filename,
 			char *include_path)
@@ -295,24 +303,28 @@ int compute_include(h_table *table, vector *paths, vector *words,
 
 		memcpy(filename_from_include, file + 1, strlen(file) - 2);
 	}
-
+	/* concatenate path from input file with the include file */
 	memcpy(include_path, input_file_path, strlen(input_file_path));
 	memcpy(include_path + strlen(input_file_path),
 		filename_from_include,
 		strlen(filename_from_include));
 
+	/* if the file does not exist and the path list is empty
+	 * return bad include
+	 */
 	if (file_exists(include_path) == 0 && paths->size == 0)
 		return 1;
 	else if (file_exists(include_path) == 1)
 		return read_write_headers(table, paths, include_path,
 						output_fp, condition);
 
-	/* find file in dirs received as parameter */
+	/* find file in dirs received as parameters */
 	for (i = 0; i < paths->size; i++) {
 		memset(include_path, 0, LINE_SIZE);
 		create_include_path(get_element(paths, i),
 					filename_from_include, include_path);
 		if (file_exists(include_path) == 1) {
+			/* read from include file and write into output file */
 			ret = read_write_headers(table, paths, include_path,
 						output_fp, condition);
 			if (ret)
@@ -322,7 +334,7 @@ int compute_include(h_table *table, vector *paths, vector *words,
 
 	return 0;
 }
-
+/* check directive type and call the special method */
 int compute_directives(h_table *table, vector *define_words,
 			vector *code_words, vector *paths,
 			char *buffer, char *input_filename,
@@ -419,6 +431,7 @@ int process_files(h_table *table, vector *paths,
 	char buffer_copy2[LINE_SIZE];
 	int condition = 1, ret = 0;
 
+	/* check the stream where to read/write */
 	if (strcmp(input_filename, "stdin") == 0)
 		input_fp = stdin;
 	else
@@ -439,7 +452,11 @@ int process_files(h_table *table, vector *paths,
 		return 1;
 	}
 
+	/* read untill EOF */
 	while (!feof(input_fp)) {
+		/* create vectors with words from directives
+		 * and with the words from the rest of the code
+		 */
 		ret = create_vector(&define_words, 5);
 		if (ret)
 			break;
@@ -453,6 +470,9 @@ int process_files(h_table *table, vector *paths,
 		memcpy(buffer_copy1, buffer, LINE_SIZE);
 		memcpy(buffer_copy2, buffer, LINE_SIZE);
 
+		/* split the same line in 2 ways:
+		 * for directives and for normal code
+		 */
 		ret = split_defines(define_words, buffer_copy1);
 		if (ret)
 			break;
@@ -460,6 +480,7 @@ int process_files(h_table *table, vector *paths,
 		ret = split_line(code_words, buffer_copy2);
 		if (ret)
 			break;
+		/* check type of directive and apply special operations */
 		ret = compute_directives(table, define_words, code_words,
 					paths, buffer, input_filename,
 					output_fp, &condition);
