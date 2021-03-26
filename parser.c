@@ -46,6 +46,8 @@ int compute_defines(h_table *table, vector *words, char *key)
 
 	if (words->size == 3) {
 		ret = insert_pair(table, words->arr[1], words->arr[2]);
+		if (ret)
+			return 12;
 		memcpy(key, get_element(words, 1), strlen(get_element(words, 1)));
 		return 0;
 	}
@@ -128,12 +130,11 @@ void replace_word(char *str, char *result, char *old_word,
 		strlen(str) - start_index + old_word_size);
 }
 
-void compute_code(h_table *table, vector *words, char *buffer)
+int compute_code(h_table *table, vector *words, char *buffer)
 {
-	int i = 0;
 	int size_counter = 0;
-	int start_key = 0;
-	int start_buf = 0;
+	int start_key = 0, start_buf = 0;
+	int i = 0, valid_values = 0;
 	char result[LINE_SIZE];
 
 	memset(result, 0, LINE_SIZE);
@@ -171,6 +172,7 @@ void compute_code(h_table *table, vector *words, char *buffer)
 		if (value != NULL) {
 			char *aux = strstr(buffer + start_buf, key);
 
+			valid_values++;
 			if (aux != NULL)
 				size_counter = aux - buffer - 1;
 
@@ -179,6 +181,7 @@ void compute_code(h_table *table, vector *words, char *buffer)
 		}
 		start_buf += strlen(key);
 	}
+	return valid_values;
 }
 
 void extract_path(char *filename, char *path)
@@ -213,7 +216,7 @@ void create_include_path(char *dir_path, char *include_filename, char *include_p
 
 }
 
-int read_write_headers(h_table *table, char *include_path,
+int read_write_headers(h_table *table, vector *paths, char *include_path,
 			FILE *output_fp, int *condition)
 {
 	vector *define_words = NULL;
@@ -253,7 +256,7 @@ int read_write_headers(h_table *table, char *include_path,
 		if (ret)
 			break;
 
-		ret = compute_directives(table, define_words, code_words, NULL,
+		ret = compute_directives(table, define_words, code_words, paths,
 					buffer, include_path, output_fp, condition);
 		if (ret)
 			break;
@@ -292,13 +295,10 @@ int compute_include(h_table *table, vector *paths, vector *words,
 		filename_from_include,
 		strlen(filename_from_include));
 
-	if (paths == NULL)
-		return 1;
-
 	if (file_exists(include_path) == 0 && paths->size == 0)
 		return 1;
 	else if (file_exists(include_path) == 1)
-		return read_write_headers(table, include_path, output_fp, condition);
+		return read_write_headers(table, paths, include_path, output_fp, condition);
 
 	/* find file in dirs received as parameter */
 	for (i = 0; i < paths->size; i++) {
@@ -306,7 +306,7 @@ int compute_include(h_table *table, vector *paths, vector *words,
 		create_include_path(get_element(paths, i),
 					filename_from_include, include_path);
 		if (file_exists(include_path) == 1) {
-			ret = read_write_headers(table, include_path,
+			ret = read_write_headers(table, paths, include_path,
 						output_fp, condition);
 			if (ret)
 				return ret;
@@ -323,6 +323,8 @@ int compute_directives(h_table *table, vector *define_words,
 {
 	int ret = 0;
 	char key[LINE_SIZE];
+	char buffer_copy[LINE_SIZE];
+	vector *code_words1 = NULL;
 
 	if (define_words->size <= 0)
 		goto free_vectors;
@@ -335,7 +337,9 @@ int compute_directives(h_table *table, vector *define_words,
 	}
 
 	if (strncmp(get_element(define_words, 0), "#define", 7) == 0) {
-		compute_defines(table, define_words, key);
+		ret = compute_defines(table, define_words, key);
+		if (ret)
+			return ret;
 
 	} else if (strncmp(get_element(define_words, 0), "#undef", 6) == 0) {
 		compute_undef(table, define_words);
@@ -371,7 +375,19 @@ int compute_directives(h_table *table, vector *define_words,
 			goto free_vectors;
 
 	} else {
-		compute_code(table, code_words, buffer);
+		int valid_values = compute_code(table, code_words, buffer);
+
+		while (valid_values) {
+			create_vector(&code_words1, 8);
+			memset(buffer_copy, 0, LINE_SIZE);
+			memcpy(buffer_copy, buffer, strlen(buffer));
+			ret = split_line(code_words1, buffer_copy);
+			if (ret)
+				break;
+			valid_values = compute_code(table, code_words1, buffer);
+			delete_vector(code_words1);
+		}
+
 		write_line(output_fp, buffer);
 	}
 

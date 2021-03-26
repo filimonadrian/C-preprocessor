@@ -45,6 +45,9 @@ void delete_vector(vector *v)
 {
 	int i = 0;
 
+	if (v == NULL)
+		return;
+
 	for (i = 0; i < v->size; i++)
 		free(v->arr[i]);
 

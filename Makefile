@@ -1,6 +1,6 @@
 CFLAGS = /nologo /W3 /MD
 
-all: so-cpp.exe
+build: so-cpp.exe
 
 so-cpp.exe: so-cpp.obj hashtable.obj vector.obj parser.obj
 	link /nologo /out:$@ $**

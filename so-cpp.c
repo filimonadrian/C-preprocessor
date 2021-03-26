@@ -53,13 +53,14 @@ int parse_filename(char **filename, char *str)
 {
 	if (*filename == NULL) {
 		*filename = malloc((strlen(str) + 1) * sizeof(char));
-		if (filename == NULL)
+		if (*filename == NULL)
 			exit(12);
 
 		memset(*filename, 0, strlen(str) + 1);
 		memcpy(*filename, str, strlen(str));
 	} else {
 		fprintf(stderr, "Multiple definitions of file!\n");
+		return 1;
 	}
 
 	return 0;
@@ -135,7 +136,6 @@ int main(int argc, char **argv)
 	vector *words = NULL;
 	h_table *table = NULL;
 	int ret = 0;
-
 	ret = create_vector(&paths, 8);
 	if (ret)
 		goto free_memory;
@@ -176,7 +176,6 @@ free_memory:
 	delete_vector(paths);
 	delete_vector(words);
 	delete_table(table);
-
 
 	return ret;
 }
