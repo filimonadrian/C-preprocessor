@@ -5,6 +5,5 @@ valgrind --leak-check=full \
          --track-origins=yes \
          --verbose \
          --log-file=valgrind-out.txt \
-#	 ./$1 -Dbere
+ 	 ./so-cpp -D DEBUG=1 -D CUSTOM_DBG=custom-debugging -I _test/inputs/test38.dir ./_test/inputs/test38.in
 
-         ./$1 -D constanta=litoral -Dmare=munte -Dbere -I Documents -IDownloads test_file.in -o output_file

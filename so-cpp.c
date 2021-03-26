@@ -17,13 +17,13 @@ int parse_symbol_mapping(char *str, entry_t **entry)
 			/* set flag for mapping */
 			key_mapping = 1;
 
-			/* copy key in entry and append '\0' */
+			/* copy key */
 			memcpy(key, str, i);
 
-			/* copy value in entry and append '\0' */
+			/* copy value */
 			value_size = str_size - i - 1;
-
 			memcpy(value, str + i + 1, value_size);
+                        /* create an entry with this pair<key, value> */
 			ret = create_pair(key, value, entry);
 			if (ret)
 				return ret;
@@ -54,7 +54,8 @@ int parse_filename(char **filename, char *str)
 	if (*filename == NULL) {
 		*filename = malloc((strlen(str) + 1) * sizeof(char));
 		if (*filename == NULL)
-			exit(12);
+			/* exit(12);*/
+                        return 12;
 
 		memset(*filename, 0, strlen(str) + 1);
 		memcpy(*filename, str, strlen(str));
@@ -62,7 +63,6 @@ int parse_filename(char **filename, char *str)
 		fprintf(stderr, "Multiple definitions of file!\n");
 		return 1;
 	}
-
 	return 0;
 }
 
@@ -76,7 +76,6 @@ int read_arguments(h_table *table, vector *paths,
 	entry_t *entry = NULL;
 
 	while (i < argc) {
-		/* if it's case -D */
 		if (strcmp(argv[i], "-D") == 0) {
 			i++;
 			ret = parse_symbol_mapping(argv[i], &entry);
@@ -151,7 +150,7 @@ int main(int argc, char **argv)
 
 	ret = read_arguments(table, paths, &output_filename,
 				&input_filename, argc, argv);
-	if (ret > 0)
+	if (ret)
 		goto free_memory;
 
 	if (input_filename == NULL) {

@@ -192,6 +192,9 @@ void delete_table(h_table *table)
 {
 	int i = 0;
 
+	if (table == NULL)
+		return;
+
 	for (i = 0; i < TABLE_SIZE; i++) {
 		entry_t *aux = NULL;
 

@@ -241,12 +241,12 @@ int read_write_headers(h_table *table, vector *paths, char *include_path,
 	while (!feof(include_fp)) {
 
 		ret = create_vector(&define_words, 5);
-		if (ret)
-			break;
+		if (ret == 12)
+			return ret;
 
 		ret = create_vector(&code_words, 5);
-		if (ret)
-			break;
+		if (ret == 12)
+			return ret;
 
 		read_line(include_fp, buffer);
 
@@ -385,12 +385,14 @@ int compute_directives(h_table *table, vector *define_words,
 		int valid_values = compute_code(table, code_words, buffer);
 
 		while (valid_values) {
-			create_vector(&code_words1, 8);
+			ret = create_vector(&code_words1, 8);
+			if (ret == 12)
+				return 12;
 			memset(buffer_copy, 0, LINE_SIZE);
 			memcpy(buffer_copy, buffer, strlen(buffer));
 			ret = split_line(code_words1, buffer_copy);
-			if (ret)
-				break;
+			if (ret == 12)
+				return 12;
 			valid_values = compute_code(table, code_words1, buffer);
 			delete_vector(code_words1);
 		}
